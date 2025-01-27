@@ -1,16 +1,14 @@
-/* Import the font at the top of your CSS file */
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
 
-/* Add this near the top of your CSS file */
 .page-title {
-  color: transparent;  /* Make the text color transparent to show gradient */
+  color: transparent;  
   background: linear-gradient(
     45deg,
-    #FF69B4 0%,    /* Hot pink */
-    #FF1E8E 25%,   /* Bright pink */
-    #FF00FF 50%,   /* Pure magenta */
-    #DA70D6 75%,   /* Bright orchid */
-    #FF69B4 100%   /* Back to hot pink */
+    #FF69B4 0%,    
+    #FF1E8E 25%,  
+    #FF00FF 50%,   
+    #DA70D6 75%,   
+    #FF69B4 100%   
   );
   background-size: 200% auto;
   background-clip: text;
@@ -60,7 +58,6 @@ body {
   margin-top: 25vh;
 }
 
-/* Center container */
 .search-container {
   display: grid;
   grid-template-columns: 1fr 50px;
@@ -184,14 +181,12 @@ body {
   font-size: 13px;
 }
 
-/* Selection style */
 ::selection {
   background-color: #b3d4fc;
   color: #000000;
   text-shadow: none;
 }
 
-/* Form element styles */
 button,
 input,
 select,
@@ -214,5 +209,4 @@ textarea {
   appearance: none;
 }
 
-/* Rest of your existing styles... */
   
