@@ -28,18 +28,28 @@ class TrackIndex:
                 track_ids.append(self.titles_index[title])
         return track_ids
 
+
     def track_ids_to_data(self, track_ids):
         # Load the data
         data = []
         for track_id in track_ids:
             track_info = self.track_data.loc[track_id]
-            data.append({
-                "id": track_id,
-                "title": track_info[("track", "title")],
-                "artist": track_info[("artist", "name")],
-                "runtime": track_info[("track", "duration")],
-                "albumCover": "https://pure-music.co.uk/wp-content/uploads/2019/04/Thriller-Album-Cover.png",
-                "link": track_info[("artist", "website")],
-            })
-        
+            if track_info[("artist", "website")]:
+                print(track_info[("artist", "website")])
+                data.append({
+                    "id": track_id,
+                    "title": track_info[("track", "title")],
+                    "artist": track_info[("artist", "name")],
+                    "runtime": track_info[("track", "duration")],
+                    "albumCover": "https://pure-music.co.uk/wp-content/uploads/2019/04/Thriller-Album-Cover.png",
+                    "link": track_info[("artist", "website")] or "",
+                })
+            else:
+                data.append({
+                    "id": track_id,
+                    "title": track_info[("track", "title")],
+                    "artist": track_info[("artist", "name")],
+                    "runtime": track_info[("track", "duration")],
+                    "albumCover": "https://pure-music.co.uk/wp-content/uploads/2019/04/Thriller-Album-Cover.png",
+                })
         return json.dumps(data, default=str)

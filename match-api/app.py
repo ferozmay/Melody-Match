@@ -8,7 +8,7 @@ app = Flask(__name__)
 # Set up CORS to prevent blockage of requests from local domains
 cors = CORS(
     app, 
-    resources={r"/api/*": {"origins": "http://localhost:5173"}}
+    resources={r"/api/*": {"origins": ["http://localhost:5173", "http://10.124.114.40:5173"]}}
 )
 
 # load the index
@@ -22,8 +22,6 @@ def handle_request():
     if query:
         song_results = song_title_index.search(query)
         data = song_title_index.track_ids_to_data(song_results[:limit])
-        print(data)
         return data
-        return song_results[:limit]
 
     return []
