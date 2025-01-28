@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import './SearchResults.css';  // Import the CSS file
+import "./SearchResults.css"; // Import the CSS file
 
 const SearchResults: React.FC = () => {
     const location = useLocation();
-    const searchQuery = new URLSearchParams(location.search).get("q");
+    const navigate = useNavigate();
+    const searchQuery = new URLSearchParams(location.search).get("q") || "";
+    const [searchInput, setSearchInput] = useState(searchQuery);
 
     const [loading, setLoading] = useState(true);
     const [results, setResults] = useState([
@@ -14,27 +16,30 @@ const SearchResults: React.FC = () => {
             title: "Song Title 1",
             artist: "Artist 1",
             runtime: "3:45",
-            albumCover: "https://freemusicarchive.org/image/?file=track_image%2FpNFCyabIWSrntsFnNu2Dzz6KPrLZw2TQV4RfOjWo.jpg&width=290&height=290&type=track",
+            albumCover:
+                "https://freemusicarchive.org/image/?file=track_image%2FpNFCyabIWSrntsFnNu2Dzz6KPrLZw2TQV4RfOjWo.jpg&width=290&height=290&type=track",
             link: "/song/1",
-            artistLink: "/artist/1"
+            artistLink: "/artist/1",
         },
         {
             id: 2,
             title: "Song Title 2",
             artist: "Artist 2",
             runtime: "4:30",
-            albumCover: "https://freemusicarchive.org/image/?file=track_image%2FDd8X6VrtfjcrgiMcX5MnKscXiaYXIAJRrazfMiWo.jpg&width=290&height=290&type=track",
+            albumCover:
+                "https://freemusicarchive.org/image/?file=track_image%2FDd8X6VrtfjcrgiMcX5MnKscXiaYXIAJRrazfMiWo.jpg&width=290&height=290&type=track",
             link: "/song/2",
-            artistLink: "/artist/2"
+            artistLink: "/artist/2",
         },
         {
             id: 3,
             title: "Song Title 3",
             artist: "Artist 3",
             runtime: "3:20",
-            albumCover: "https://freemusicarchive.org/image/?file=images%2Ftracks%2FTrack_-_2015110363828993&width=290&height=290&type=track",
+            albumCover:
+                "https://freemusicarchive.org/image/?file=images%2Ftracks%2FTrack_-_2015110363828993&width=290&height=290&type=track",
             link: "/song/3",
-            artistLink: "/artist/3"
+            artistLink: "/artist/3",
         },
     ]);
 
@@ -45,8 +50,26 @@ const SearchResults: React.FC = () => {
         }, 1000); // Simulate delay
     }, [searchQuery]);
 
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchInput.trim()) {
+            navigate(`/search?q=${encodeURIComponent(searchInput.trim())}`);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (
+            searchInput.trim() !== "" &&
+            (e.metaKey || e.ctrlKey) &&
+            e.key === "Enter"
+        ) {
+            e.preventDefault();
+            navigate(`/search?q=${encodeURIComponent(searchInput.trim())}`);
+        }
+    };
+
     return (
-        <div className="search-results-container">
+        <div className="search-results-container" style={{ marginTop: "20px" }}>
             {/* Title container */}
             <div className="search-results-title-container">
                 <Link
@@ -66,20 +89,84 @@ const SearchResults: React.FC = () => {
                             width: "auto",
                         }}
                     />
-                    <h2>Melody Match</h2>
+                    <h2>melody_match</h2>
                 </Link>
+            </div>
+
+            {/* Search form in its own container */}
+            <div
+                style={{
+                    width: "100%",
+                    maxWidth: "800px",
+                    margin: "10px auto",
+                }}
+            >
+                <form
+                    className="search-container"
+                    role="search"
+                    aria-label="Search"
+                    onSubmit={handleSubmit}
+                >
+                    <input
+                        className="search-input"
+                        type="text"
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Search for music..."
+                        autoCapitalize="off"
+                        autoComplete="off"
+                        autoCorrect="off"
+                        spellCheck="false"
+                        aria-label="Search"
+                        title="Search"
+                        aria-autocomplete="none"
+                        aria-haspopup="false"
+                        maxLength={2048}
+                    />
+                    <button
+                        className="search-button"
+                        type="submit"
+                        aria-label="Submit"
+                    >
+                        <svg
+                            width="20"
+                            height="20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                fillRule="evenodd"
+                                clipRule="evenodd"
+                                d="M8 16a8 8 0 1 1 5.965-2.67l5.775 5.28a.8.8 0 1 1-1.08 1.18l-5.88-5.375A7.965 7.965 0 0 1 8 16Zm4.374-3.328a.802.802 0 0 0-.201.18 6.4 6.4 0 1 1 .202-.181Z"
+                                fill="url(#search_icon_gr)"
+                            />
+                            <defs>
+                                <linearGradient
+                                    id="search_icon_gr"
+                                    x1="20"
+                                    y1="0"
+                                    x2="0"
+                                    y2="20"
+                                    gradientUnits="userSpaceOnUse"
+                                >
+                                    <stop stopColor="#FF1493" />
+                                    <stop offset="0.5" stopColor="#FF00FF" />
+                                    <stop offset="1" stopColor="#9400D3" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </button>
+                </form>
             </div>
 
             {/* Search results content */}
             <div className="search-results-content">
-                <h1>
-                    Search results for:{" "}
-                    <span className="search-results-title">{searchQuery}</span>
-                </h1>
-
                 {/* Loading indicator */}
                 {loading ? (
-                    <div style={{ color: "#FFB74D", fontSize: "20px" }}>Loading...</div>
+                    <div style={{ color: "#FFB74D", fontSize: "20px" }}>
+                        Loading...
+                    </div>
                 ) : (
                     <div style={{ marginTop: "30px" }}>
                         {results.length > 0 ? (
@@ -97,9 +184,15 @@ const SearchResults: React.FC = () => {
 
                                     {/* Song Info */}
                                     <div className="song-info">
-                                        <h3 className="song-title">{result.title}</h3>
-                                        <p className="song-artist">{result.artist}</p>
-                                        <p className="song-runtime">{result.runtime}</p>
+                                        <h3 className="song-title">
+                                            {result.title}
+                                        </h3>
+                                        <p className="song-artist">
+                                            {result.artist}
+                                        </p>
+                                        <p className="song-runtime">
+                                            {result.runtime}
+                                        </p>
                                     </div>
 
                                     {/* View Details Button */}
