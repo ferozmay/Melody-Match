@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 const SearchResults: React.FC = () => {
     const location = useLocation();
     const searchQuery = new URLSearchParams(location.search).get("q");
+    const searchResults = useState<string[]>([]);
 
     return (
         <div
