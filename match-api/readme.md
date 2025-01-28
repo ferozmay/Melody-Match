@@ -9,6 +9,9 @@
 2. Install dependencies `pip install -r requirements.txt`
 3. Start dev server `flask run --host=0.0.0.0 --debug`
 
+4. Install dependencies `npm i`
+5. Launch front-end server `npm run dev`
+
 ## Deployment
 
 ## Dev instructions
