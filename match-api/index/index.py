@@ -16,6 +16,7 @@ class TrackIndex:
         self.track_data.drop(nan_track_titles, inplace=True)
 
         # Process the titles
+        # TODO: pickle that shit
         track_titles = self.track_data[("track", "title")].apply(process_text)
         # create the index from processed titles {title: track_id}
         self.titles_index = dict(zip(track_titles, self.track_data.index))
