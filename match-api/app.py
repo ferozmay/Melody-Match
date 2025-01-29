@@ -1,6 +1,8 @@
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
 from index.index import TrackIndex
+import pickle, pandas as pd, time
+
 
 # init the app
 app = Flask(__name__)
@@ -12,8 +14,11 @@ cors = CORS(
 )
 
 # load the index
+start_time = time.time()
 song_title_index = TrackIndex()
 song_title_index.load_index()
+print("Data loaded successfully! Time taken: ", time.time() - start_time)
+
 
 @app.route("/api/track")
 def handle_request():

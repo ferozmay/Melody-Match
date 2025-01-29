@@ -4,23 +4,24 @@ import ast
 import json
 from utils.text_processing import process_text
 import urllib.parse
-
+from index.clean_store_load import load_track_data
 
 class TrackIndex:
     def load_index(self):
-        # Load the data
-        self.track_data = pd.read_csv('data/fma_metadata/tracks.csv', index_col=0, header=[0, 1])
+        self.track_data, self.titles_index = load_track_data()
+
+    def load_index_slow(self):
+        self.track_data_slow = pd.read_csv('data/fma_metadata/tracks.csv', index_col=0, header=[0, 1])
 
         # Drop tracks with no titles
-        nan_track_titles = self.track_data[self.track_data[("track", "title")].isna()].index
-        self.track_data.drop(nan_track_titles, inplace=True)
+        nan_track_titles = self.track_data_slow[self.track_data_slow[("track", "title")].isna()].index
+        self.track_data_slow.drop(nan_track_titles, inplace=True)
 
         # Process the titles
-        track_titles = self.track_data[("track", "title")].apply(process_text)
+        track_titles = self.track_data_slow[("track", "title")].apply(process_text)
         # create the index from processed titles {title: track_id}
-        self.titles_index = dict(zip(track_titles, self.track_data.index))
-
-
+        self.titles_index_slow = dict(zip(track_titles, self.track_data_slow.index))
+    
     def search(self, query):
         query = process_text(query)
         track_ids = []
