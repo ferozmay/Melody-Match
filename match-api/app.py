@@ -12,16 +12,17 @@ cors = CORS(
 )
 
 # load the index
-song_title_index = TrackIndex()
-song_title_index.load_index()
+# song_title_index = TrackIndex()
+# song_title_index.load_index()
 
 @app.route("/api/track")
 def handle_request():
     query = request.args.get("query", None)
     limit = int(request.args.get("limit", 10))
     if query:
-        song_results = song_title_index.search(query)
-        data = song_title_index.track_ids_to_data(song_results[:limit])
-        return data
+        return []
+        # song_results = song_title_index.search(query)
+        # data = song_title_index.track_ids_to_data(song_results[:limit])
+        # return data
 
     return []
