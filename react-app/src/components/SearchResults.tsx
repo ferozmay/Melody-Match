@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { TITLE_URL } from "../utils/urls"; // Import the API URL
 import { Song } from "../utils/types";
