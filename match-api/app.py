@@ -1,3 +1,4 @@
+import json
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
 from index.index import TrackIndex
@@ -19,9 +20,10 @@ song_title_index.load_index()
 def handle_request():
     query = request.args.get("query", None)
     limit = int(request.args.get("limit", 10))
+
     if query:
-        song_results = song_title_index.search(query)
-        data = song_title_index.track_ids_to_data(song_results[:limit])
+        song_results = song_title_index.simple_bow_search(query)
+        data = song_title_index.track_ids_to_data(list(song_results)[:limit])
         return data
 
     return []

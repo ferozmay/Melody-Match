@@ -4,6 +4,7 @@ import ast
 import json
 from utils.text_processing import process_text
 import urllib.parse
+from collections import defaultdict, Counter
 
 
 class TrackIndex:
@@ -21,6 +22,34 @@ class TrackIndex:
         # create the index from processed titles {title: track_id}
         self.titles_index = dict(zip(track_titles, self.track_data.index))
 
+        # generate the info for each token as a tuple (token, track_id, position)
+        token_instances = []
+        for track_id, title in zip(self.track_data.index, track_titles):
+            words = title.split()  # tokenize title into words
+            for position, word in enumerate(words, start=1):
+                token_instances.append((word, track_id, position))
+        
+        # create the inverted index
+        self.inverted_index = self.create_inverted_index(token_instances)
+
+        # save to file
+        with open('inverted-index.json', 'w') as f:
+            json.dump(self.inverted_index, f, indent=4)
+
+    def create_inverted_index(self, term_sequence):
+        inverted_index = defaultdict(lambda: {'doc_freq': 0, 'docs': {}})
+        
+        for term, track_id, position in term_sequence:
+            # +1 doc_freq when we encounter the term in a new title
+            if track_id not in inverted_index[term]['docs']:
+                inverted_index[term]['doc_freq'] += 1
+
+            # store the position of the term in the title
+            if track_id not in inverted_index[term]['docs']:
+                inverted_index[term]['docs'][track_id] = []
+            inverted_index[term]['docs'][track_id].append(position)
+        
+        return inverted_index
 
     def search(self, query):
         query = process_text(query)
@@ -57,3 +86,30 @@ class TrackIndex:
                 "link": google_search, # temporarily using the google search instead of the artist website 
             })
         return json.dumps(data, default=str)
+    
+    def simple_bow_search(self, query: str):
+
+        query_tokens = process_text(query).split()
+
+        term_doc_ids = []
+
+        if len(query_tokens) == 1:
+            term = query_tokens[0]
+            if term in self.inverted_index:
+                term_doc_ids.append(set(self.inverted_index[term]['docs'].keys()))
+                docs = self.inverted_index[term]['docs'].keys()
+                return docs
+
+        # multiple search terms
+        for term in query_tokens:
+            if term in self.inverted_index:
+                term_doc_ids.append(set(self.inverted_index[term]['docs'].keys()))
+        
+        if not term_doc_ids:
+            return []
+                
+        common_doc_ids = set.intersection(*term_doc_ids)
+
+        results = list(common_doc_ids)
+        
+        return results
