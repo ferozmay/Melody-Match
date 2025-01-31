@@ -10,9 +10,23 @@ from collections import defaultdict, Counter
 
 class TrackIndex:
     def load_index(self):
-        # Load the data
+        # load the data
         self.track_data = pd.read_csv('data/fma_metadata/tracks.csv', index_col=0, header=[0, 1])
 
+        # load raw tracks 
+        self.raw_tracks = pd.read_csv('data/fma_metadata/raw_tracks.csv')
+
+        # get only the track_id, track_url and track_image_file cols
+        self.raw_tracks = self.raw_tracks[["track_id", "track_url", "track_image_file", "artist_url"]]
+
+        self.raw_tracks.set_index("track_id", inplace=True)
+
+        # convert raw_tracks to a multi-index format to match track_data
+        self.raw_tracks.columns = pd.MultiIndex.from_tuples([("track", col) for col in self.raw_tracks.columns])
+
+        # merge with track_data using track_id as the key
+        self.track_data = self.track_data.merge(self.raw_tracks, left_index=True, right_index=True, how="left")
+        
         # Drop tracks with no titles
         nan_track_titles = self.track_data[self.track_data[("track", "title")].isna()].index
         self.track_data.drop(nan_track_titles, inplace=True)
@@ -22,6 +36,9 @@ class TrackIndex:
         track_titles = self.track_data[("track", "title")].apply(process_text)
         # create the index from processed titles {title: track_id}
         self.titles_index = dict(zip(track_titles, self.track_data.index))
+
+        # Fix album cover URLs
+        self.track_data[("track", "track_image_file")] = self.track_data.index.map(self.fix_album_cover_url)
 
         # generate the info for each token as a tuple (token, track_id, position)
         token_instances = []
@@ -49,7 +66,7 @@ class TrackIndex:
             if track_id not in inverted_index[term]['docs']:
                 inverted_index[term]['docs'][track_id] = []
             inverted_index[term]['docs'][track_id].append(position)
-        
+
         return inverted_index
 
     def search(self, query):
@@ -83,12 +100,14 @@ class TrackIndex:
                 "title": track_info[("track", "title")],
                 "artist": track_info[("artist", "name")],
                 "runtime": track_info[("track", "duration")],
-                "albumCover": "https://pure-music.co.uk/wp-content/uploads/2019/04/Thriller-Album-Cover.png",
-                "link": google_search, # temporarily using the google search instead of the artist website 
+                "albumCover": track_info[("track", "track_image_file")],
+                "link": track_info[("track","track_url")],
+                "artistLink": track_info[("track", "artist_url")] # temporarily using the google search instead of the artist website 
             })
+
         return json.dumps(data, default=str)
     
-    def simple_bow_search(self, query: str):
+    def simple_search(self, query: str):
 
         query_tokens = process_text(query).split()
 
@@ -120,7 +139,6 @@ class TrackIndex:
         # weight_t,d = (1 + log _10 tf (t,d) * log _10 (N/df(t))
         # tf(t,d) = frequency of term t in document d
         # df(t) = number of documents containing term t
-
         # N = total number of documents in the collection
 
         terms = process_text(query).split()
@@ -150,3 +168,29 @@ class TrackIndex:
                     retrieval_scores[doc_id] += weight
 
         return retrieval_scores
+    
+    def fix_album_cover_url(self, track_id):
+
+        track_info = self.track_data.loc[track_id]
+        album_cover_path = track_info[("track", "track_image_file")]
+
+        placeholder = "https://community.mp3tag.de/uploads/default/original/2X/a/acf3edeb055e7b77114f9e393d1edeeda37e50c9.png"
+
+        
+        if isinstance(album_cover_path, float) and np.isnan(album_cover_path):
+            return placeholder
+
+        if 'albums' in album_cover_path:
+            actual_url = album_cover_path.replace("file/images/albums/", "image/?file=images%2Falbums%2F")
+            actual_url = actual_url + "&width=290&height=290&type=album"
+        elif 'tracks' in album_cover_path:
+            actual_url = album_cover_path.replace("file/images/tracks/", "image/?file=images%2Ftracks%2F")
+            actual_url = actual_url + "&width=290&height=290&type=track"
+        else:
+            return placeholder
+
+    
+        return actual_url
+
+
+    
