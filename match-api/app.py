@@ -1,3 +1,4 @@
+import json
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
 from index.index import TrackIndex
@@ -19,10 +20,27 @@ cors = CORS(
 def handle_request():
     query = request.args.get("query", None)
     limit = int(request.args.get("limit", 10))
+
     if query:
-        return []
-        # song_results = song_title_index.search(query)
-        # data = song_title_index.track_ids_to_data(song_results[:limit])
-        # return data
+        # get results
+        song_results = song_title_index.simple_bow_search(query)
+
+        collection_size = len(song_title_index.track_data)  # total number of tracks
+        
+        # get tfidf scores for this query
+        tfidf_scores = song_title_index.tfidf_scores(query, collection_size)
+
+        # sort the results by tdidf score
+        ranked_results = sorted(
+            [(track_id, tfidf_scores.get(track_id, 0)) for track_id in song_results],  
+            key=lambda x: x[1],  
+            reverse=True
+        )
+
+        ranked_track_ids = [track_id for track_id, _ in ranked_results][:limit] 
+
+        data = song_title_index.track_ids_to_data(ranked_track_ids)
+
+        return data
 
     return []
