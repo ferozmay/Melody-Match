@@ -5,53 +5,24 @@ import ast
 import json
 from utils.text_processing import process_text
 import urllib.parse
-from collections import defaultdict, Counter
-
+from index.clean_store_load import load_track_data
 
 class TrackIndex:
     def load_index(self):
-        # Load the data
-        self.track_data = pd.read_csv('data/fma_metadata/tracks.csv', index_col=0, header=[0, 1])
+        self.track_data, self.titles_index = load_track_data()
+
+    def load_index_slow(self):
+        self.track_data_slow = pd.read_csv('data/fma_metadata/tracks.csv', index_col=0, header=[0, 1])
 
         # Drop tracks with no titles
-        nan_track_titles = self.track_data[self.track_data[("track", "title")].isna()].index
-        self.track_data.drop(nan_track_titles, inplace=True)
+        nan_track_titles = self.track_data_slow[self.track_data_slow[("track", "title")].isna()].index
+        self.track_data_slow.drop(nan_track_titles, inplace=True)
 
         # Process the titles
-        # TODO: pickle that shit
-        track_titles = self.track_data[("track", "title")].apply(process_text)
+        track_titles = self.track_data_slow[("track", "title")].apply(process_text)
         # create the index from processed titles {title: track_id}
-        self.titles_index = dict(zip(track_titles, self.track_data.index))
-
-        # generate the info for each token as a tuple (token, track_id, position)
-        token_instances = []
-        for track_id, title in zip(self.track_data.index, track_titles):
-            words = title.split()  # tokenize title into words
-            for position, word in enumerate(words, start=1):
-                token_instances.append((word, track_id, position))
-        
-        # create the inverted index
-        self.inverted_index = self.create_inverted_index(token_instances)
-
-        # save to file
-        with open('inverted-index.json', 'w') as f:
-            json.dump(self.inverted_index, f, indent=4)
-
-    def create_inverted_index(self, term_sequence):
-        inverted_index = defaultdict(lambda: {'doc_freq': 0, 'docs': {}})
-        
-        for term, track_id, position in term_sequence:
-            # +1 doc_freq when we encounter the term in a new title
-            if track_id not in inverted_index[term]['docs']:
-                inverted_index[term]['doc_freq'] += 1
-
-            # store the position of the term in the title
-            if track_id not in inverted_index[term]['docs']:
-                inverted_index[term]['docs'][track_id] = []
-            inverted_index[term]['docs'][track_id].append(position)
-        
-        return inverted_index
-
+        self.titles_index_slow = dict(zip(track_titles, self.track_data_slow.index))
+    
     def search(self, query):
         query = process_text(query)
         track_ids = []
