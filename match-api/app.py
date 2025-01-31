@@ -44,7 +44,7 @@ def handle_request():
 
     if query:
         # get results
-        song_results = song_title_index.simple_bow_search(query)
+        song_results = song_title_index.simple_search(query)
 
         collection_size = len(song_title_index.track_data)  # total number of tracks
         
