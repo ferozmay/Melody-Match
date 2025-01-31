@@ -9,13 +9,13 @@
 1. Set up venv `python -m venv venv`
 2. Activate venv with `source venv/Scripts/activate` or `source venv/bin/activate` depending on OS
 3. Install dependencies `pip install -r requirements.txt`
+4. Create a folder `data/stored_data/`
 4. Run `python -m index.clean_store_load`
 5. Start dev server `flask run --host=0.0.0.0 --debug`
 
 # Set up front-end
 1. Install dependencies `npm i`
 2. Launch front-end server `npm run dev`
-
 ## Deployment
 
 ## Dev instructions

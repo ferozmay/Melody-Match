@@ -1,9 +1,11 @@
+import time
+app_start_time = time.time()
 import json
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
 from index.index import TrackIndex
 import pickle, pandas as pd, time
-
+import threading
 
 # init the app
 app = Flask(__name__)
@@ -14,12 +16,26 @@ cors = CORS(
     resources={r"/api/*": {"origins": ["http://localhost:5173", "http://10.124.114.40:5173"]}}
 )
 
-# load the index
-start_time = time.time()
-song_title_index = TrackIndex()
-song_title_index.load_index()
-print("Data loaded successfully! Time taken: ", time.time() - start_time)
+# # load the index
+# start_time = time.time()
+# song_title_index = TrackIndex()
+# song_title_index.load_index()
+# print("Data loaded successfully! Time taken: ", time.time() - start_time)
 
+song_title_index = None
+def load_index():
+    global song_title_index
+    song_title_index = TrackIndex()
+    start_time = time.time()
+    song_title_index.load_index()
+    print("Data loaded successfully! Time taken: ", time.time() - start_time)
+
+index_thread = threading.Thread(target=load_index)
+index_thread.start()
+
+
+app_end_time = time.time()
+print("App loaded successfully! Time taken: ", app_end_time - app_start_time)
 
 @app.route("/api/track")
 def handle_request():
