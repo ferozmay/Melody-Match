@@ -19,7 +19,7 @@ from scipy import stats
 import pandas as pd
 import librosa
 from tqdm import tqdm
-import utils
+import notebook_utils
 
 
 def columns():
@@ -59,7 +59,7 @@ def compute_features(tid):
         features[name, 'max'] = np.max(values, axis=1)
 
     try:
-        filepath = utils.get_audio_path(os.environ.get('AUDIO_DIR'), tid)
+        filepath = notebook_utils.get_audio_path(os.environ.get('AUDIO_DIR'), tid)
         x, sr = librosa.load(filepath, sr=None, mono=True)  # kaiser_fast
 
         f = librosa.feature.zero_crossing_rate(x, frame_length=2048, hop_length=512)
@@ -110,7 +110,7 @@ def compute_features(tid):
 
 
 def main():
-    tracks = utils.load('tracks.csv')
+    tracks = notebook_utils.load('tracks.csv')
     features = pd.DataFrame(index=tracks.index,
                             columns=columns(), dtype=np.float32)
 
@@ -153,7 +153,7 @@ def test(features, ndigits):
     if len(indices) > 0:
         print('Failed tracks: {}'.format(', '.join(str(i) for i in indices)))
 
-    tmp = utils.load('features.csv')
+    tmp = notebook_utils.load('features.csv')
     np.testing.assert_allclose(tmp.values, features.values, rtol=10**-ndigits)
 
 
