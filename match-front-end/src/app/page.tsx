@@ -17,7 +17,7 @@ const MusicSearchTab = () => {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-custom-gradient bg-fixed bg-cover">
-            <div className="flex items-center gap-4 hover:scale-110 transition-transform -mt-96">
+            <div className="flex items-center gap-4 hover:scale-110 transition-transform -mt-20">
                 <div className="items-center px-4 py-4 ring-1 ring-gray-900/5 rounded-lg leading-none flex justify-center space-x-5">
                     <img
                         src="/audio-waves.png"
