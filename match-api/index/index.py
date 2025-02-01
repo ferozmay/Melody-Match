@@ -1,34 +1,16 @@
+import math
 import numpy as np
 import pandas as pd
 import ast
 import json
 from utils.text_processing import process_text
 import urllib.parse
-
+from index.clean_store_load import load_track_data
 
 class TrackIndex:
     def load_index(self):
-        # Load the data
-        self.track_data = pd.read_csv('data/fma_metadata/tracks.csv', index_col=0, header=[0, 1])
+        self.track_data, self.inverted_index = load_track_data()
 
-        # Drop tracks with no titles
-        nan_track_titles = self.track_data[self.track_data[("track", "title")].isna()].index
-        self.track_data.drop(nan_track_titles, inplace=True)
-
-        # Process the titles
-        # TODO: pickle that shit
-        track_titles = self.track_data[("track", "title")].apply(process_text)
-        # create the index from processed titles {title: track_id}
-        self.titles_index = dict(zip(track_titles, self.track_data.index))
-
-
-    def search(self, query):
-        query = process_text(query)
-        track_ids = []
-        for title in self.titles_index.keys():
-            if query in title:
-                track_ids.append(self.titles_index[title])
-        return track_ids
 
     def get_google_search_link(song, artist, album):
         google_search = f"Free Music Archive {song} {artist} {album}"
@@ -53,7 +35,76 @@ class TrackIndex:
                 "title": track_info[("track", "title")],
                 "artist": track_info[("artist", "name")],
                 "runtime": track_info[("track", "duration")],
-                "albumCover": "https://pure-music.co.uk/wp-content/uploads/2019/04/Thriller-Album-Cover.png",
-                "link": google_search, # temporarily using the google search instead of the artist website 
+                "albumCover": track_info[("track", "track_image_file")],
+                "link": track_info[("track","track_url")],
+                "artistLink": track_info[("track", "artist_url")] # temporarily using the google search instead of the artist website 
             })
+
         return json.dumps(data, default=str)
+    
+    def simple_search(self, query: str):
+
+        query_tokens = process_text(query).split()
+
+        term_doc_ids = []
+
+        if len(query_tokens) == 1:
+            term = query_tokens[0]
+            if term in self.inverted_index:
+                term_doc_ids.append(set(self.inverted_index[term]['docs'].keys()))
+                docs = self.inverted_index[term]['docs'].keys()
+                return docs
+
+        # multiple search terms
+        for term in query_tokens:
+            if term in self.inverted_index:
+                term_doc_ids.append(set(self.inverted_index[term]['docs'].keys()))
+        
+        if not term_doc_ids:
+            return []
+                
+        common_doc_ids = set.intersection(*term_doc_ids)
+
+        results = list(common_doc_ids)
+        
+        return results
+
+    def tfidf_scores(self, query: str, collection_size: int):
+        # for each query term, calculate the weight of the term in each document
+        # weight_t,d = (1 + log _10 tf (t,d) * log _10 (N/df(t))
+        # tf(t,d) = frequency of term t in document d
+        # df(t) = number of documents containing term t
+        # N = total number of documents in the collection
+
+        terms = process_text(query).split()
+        term_dfs = {term: self.inverted_index[term]['doc_freq'] for term in terms}
+
+        # for each doc, calculate the retrieval score
+        # (the sum of the weights of the terms that appear in both the query and the document)
+
+        retrieval_scores = {}
+        
+        # get docs to consider (any doc that contains at least one of the query terms)
+        doc_ids = set()
+        for term in terms:
+            if term in self.inverted_index:
+                doc_ids.update(self.inverted_index[term]['docs'].keys())
+
+        # for each doc, calculate the retrieval score
+        for doc_id in doc_ids:
+            if doc_id not in retrieval_scores:
+                retrieval_scores[doc_id] = 0
+            for term in terms:
+                weight = 0
+                if term in self.inverted_index and doc_id in self.inverted_index[term]['docs']:
+                    tf = len(self.inverted_index[term]['docs'][doc_id]) # no. of listed appearances of term in doc = freq. in doc
+                    df = term_dfs[term]
+                    weight = (1 + math.log10(tf)) * math.log10(collection_size / df)
+                    retrieval_scores[doc_id] += weight
+
+        return retrieval_scores
+    
+
+
+
+    
