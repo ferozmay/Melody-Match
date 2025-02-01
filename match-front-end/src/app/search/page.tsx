@@ -78,7 +78,7 @@ export default function SearchResultsPage() {
             <div className="absolute top-5 left-5 flex items-center gap-[15px] z-10">
                 <Link
                     href="/"
-                    className="flex items-center gap-[15px] no-underline"
+                    className="flex items-center gap-[10px] no-underline"
                 >
                     <img
                         src="/audio-waves.png"
@@ -92,7 +92,7 @@ export default function SearchResultsPage() {
             </div>
 
             {/* Search form */}
-            <div className="w-full max-w-[800px] mt-20">
+            <div className="w-full max-w-[600px] mt-20">
                 <form
                     className="w-full max-w-2xl bg-white bg-opacity-20 backdrop-blur-md rounded-lg shadow-lg p-2 transition duration-300 hover:shadow-2xl focus-within:shadow-2xl flex items-center gap-2"
                     role="search"
