@@ -1,72 +1,56 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+"use client";
 
-const MusicSearchTab: React.FC = () => {
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+
+const MusicSearchTab = () => {
     const [searchQuery, setSearchQuery] = useState("");
-    const navigate = useNavigate();
+    const router = useRouter();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (searchQuery.trim()) {
-            navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-        }
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (
-            searchQuery.trim() !== "" &&
-            (e.metaKey || e.ctrlKey) &&
-            e.key === "Enter"
-        ) {
-            e.preventDefault();
-            navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+            router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
         }
     };
 
     return (
-        <div className="container">
-            <div className="title-container">
-                <img
-                    src="/audio-waves.png"
-                    alt="Sound waves icon"
-                    className="title-icon"
-                />
-                <h1 className="page-title">melody_match</h1>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-custom-gradient bg-fixed bg-cover">
+            <div className="flex items-center gap-4 hover:scale-110 transition-transform -mt-96">
+                <div className="items-center px-4 py-4 ring-1 ring-gray-900/5 rounded-lg leading-none flex justify-center space-x-5">
+                    <img
+                        src="/audio-waves.png"
+                        alt="Logo"
+                        className="h-36 w-36"
+                    />
+                    <h1 className="text-center text-transparent text-7xl font-black animate-gradient">
+                        melody_match
+                    </h1>
+                </div>
             </div>
+
             <form
-                className="search-container"
-                role="search"
-                aria-label="Search"
                 onSubmit={handleSubmit}
+                className="w-full max-w-2xl bg-white bg-opacity-20 backdrop-blur-md rounded-lg shadow-lg p-2 transition duration-300 hover:shadow-2xl focus-within:shadow-2xl flex items-center gap-2"
             >
                 <input
-                    className="search-input"
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={handleKeyDown}
                     placeholder="Search for music..."
-                    autoCapitalize="off"
-                    autoComplete="off"
-                    autoCorrect="off"
-                    spellCheck="false"
-                    aria-label="Search"
-                    title="Search"
-                    aria-autocomplete="none"
-                    aria-haspopup="false"
-                    maxLength={2048}
-                    autoFocus
+                    className="flex-1 h-11 border-0 bg-transparent text-white text-lg px-4 focus:outline-none font-mono placeholder-white/70"
                 />
                 <button
-                    className="search-button"
                     type="submit"
-                    aria-label="Submit"
+                    className="w-12 h-12 flex items-center justify-center bg-transparent rounded-lg hover:bg-white/10 transition cursor-pointer"
                 >
                     <svg
                         width="20"
                         height="20"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
+                        className="drop-shadow-md transition-all hover:drop-shadow-lg"
                     >
                         <path
                             fillRule="evenodd"
