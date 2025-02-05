@@ -85,10 +85,7 @@ def handle_request():
 
             ranked_album_ids = [album_id for album_id, _ in ranked_results][:limit]
 
-            data = str(album_ids_to_data(album_index.album_data, ranked_album_ids)).replace("NaN", "null")
-
-            with open("album-query-results.json", "w") as outfile:
-                json.dump(data, outfile, indent=4) 
+            data = album_ids_to_data(album_index.album_data, ranked_album_ids)
 
         return data
 
