@@ -39,17 +39,16 @@ def clean_track_data():
 
 def clean_album_data():
 
-    album_data = pd.read_csv('data/fma_metadata/raw_albums.csv', index_col=0, header=[0, 1])
+    album_data = pd.read_csv('data/fma_metadata/raw_albums.csv')
 
-    # drop albums with no titles
-    nan_track_titles = album_data[album_data[("album_title")].isna()].index
-    album_data.drop(nan_track_titles, inplace=True)
+    print(album_data['album_title'].head())
+
 
     # process album titles
     album_titles = album_data[("album_title")].apply(process_text)
 
     # fix image urls
-    album_data[("album_image_file")] = album_data.index.map(lambda x: fix_album_cover_url(album_data, x))
+    album_data[("album_image_file")] = album_data.index.map(lambda x: fix_album_cover_url(album_data, x, True))
 
     return album_data, album_titles
     

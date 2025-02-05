@@ -51,7 +51,7 @@ def handle_request():
     query = request.args.get("query", None)
     limit = int(request.args.get("limit", 10))
 
-    track_query = True
+    track_query = False
 
     if query:
         # get results
@@ -68,7 +68,7 @@ def handle_request():
             )
 
             ranked_track_ids = [track_id for track_id, _ in ranked_results][:limit] 
-            
+
             data = track_ids_to_data(track_index.track_data, ranked_track_ids)
 
         else:
@@ -85,8 +85,10 @@ def handle_request():
 
             ranked_album_ids = [album_id for album_id, _ in ranked_results][:limit]
 
-            data = album_ids_to_data(album_index.album_data, ranked_album_ids)
+            data = str(album_ids_to_data(album_index.album_data, ranked_album_ids)).replace("NaN", "null")
 
+            with open("album-query-results.json", "w") as outfile:
+                json.dump(data, outfile, indent=4) 
 
         return data
 

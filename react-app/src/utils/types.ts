@@ -6,3 +6,13 @@ export type Song = {
     albumCover: string;
     link: string;
 }
+
+export type Album = {
+    id: number;
+    title: string;
+    artist: string;
+    releaseDate: string;
+    albumCover: string;
+    noOfTracks: number;
+    link: string;
+}
