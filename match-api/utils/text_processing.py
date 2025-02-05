@@ -36,6 +36,6 @@ def normalize(collection: List[str]) -> List[str]:
 
 def process_text(text: str):
     tokens = tokenize_text(text)
-    tokens = remove_stopwords(tokens)
+    # tokens = remove_stopwords(tokens)
     tokens = normalize(tokens)
     return " ".join(tokens)

@@ -21,7 +21,7 @@ def simple_search(query: str, index):
         if not term_doc_ids:
             return []
                 
-        common_doc_ids = set.intersection(*term_doc_ids)
+        common_doc_ids = set.union(*term_doc_ids)
 
         results = list(common_doc_ids)
         
