@@ -10,7 +10,7 @@ def tfidf(query: str, index, collection_size: int):
         # N = total number of documents in the collection
 
         terms = process_text(query).split()
-        term_dfs = {term: index[term]['doc_freq'] for term in terms}
+        term_dfs = {term: index[term]['doc_freq'] for term in terms if term in index}
 
         # for each doc, calculate the retrieval score
         # (the sum of the weights of the terms that appear in both the query and the document)

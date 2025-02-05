@@ -56,9 +56,9 @@ def handle_request():
     if query:
         # get results
         if track_query:
-            track_results = simple_search(query, track_index.inverted_index)
+            track_results = simple_search(query, track_index.index)
             collection_size = len(track_index.track_data)  # total number of tracks
-            tfidf_scores = tfidf(query, track_index.inverted_index, collection_size)
+            tfidf_scores = tfidf(query, track_index.index, collection_size)
             
             # sort the results by tdidf score
             ranked_results = sorted(
@@ -68,13 +68,13 @@ def handle_request():
             )
 
             ranked_track_ids = [track_id for track_id, _ in ranked_results][:limit] 
-
+            
             data = track_ids_to_data(track_index.track_data, ranked_track_ids)
 
         else:
-            album_results = simple_search(query, album_index.inverted_index)
+            album_results = simple_search(query, album_index.index)
             collection_size = len(album_index.album_data)  # total number of albums
-            tfidf_scores = tfidf(query, track_index.inverted_index, collection_size)
+            tfidf_scores = tfidf(query, album_index.index, collection_size)
             
             # sort the results by tdidf score
             ranked_results = sorted(
