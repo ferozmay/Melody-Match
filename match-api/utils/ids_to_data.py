@@ -38,7 +38,8 @@ def track_ids_to_data(track_data, track_ids):
             "link": handle_nan(track_info[("track","track_url")]),
             "artistLink": handle_nan(track_info[("track", "artist_url")]),
             "album": handle_nan(track_info[("album", "title")]),
-            "albumLink": handle_nan(track_info[("track", "album_url")])
+            "albumLink": handle_nan(track_info[("track", "album_url")]),
+            "topGenre": handle_nan(track_info[("track", "genre_top")])
         })
 
     return json.dumps(data, default=str)

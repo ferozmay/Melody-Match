@@ -1,16 +1,17 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import Head from "next/head";
-import { Geist, Geist_Mono } from "next/font/google";
+import {Inter } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
 });
 
@@ -30,7 +31,7 @@ export default function RootLayout({
         <link rel="icon" type="image/png" href="/audio-waves.png" sizes="any" />
       </Head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <div className="bg-custom-gradient bg-fixed bg-cover min-h-screen">
           <div className="h-20 flex items-center px-12 py-2 z-10">

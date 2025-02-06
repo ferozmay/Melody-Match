@@ -12,7 +12,11 @@ const placeholderResults = {
         "https://freemusicarchive.org/image/?file=track_image%2FpNFCyabIWSrntsFnNu2Dzz6KPrLZw2TQV4RfOjWo.jpg&width=290&height=290&type=track",
       link: "/song/1",
       artistLink: "/artist/1",
+      album: "Album 1",
+      albumLink: "/album/1",
+      topGenre: "Rock"
     },
+
     {
       id: 2,
       title: "Song Title 2",
@@ -22,16 +26,22 @@ const placeholderResults = {
         "https://freemusicarchive.org/image/?file=track_image%2FDd8X6VrtfjcrgiMcX5MnKscXiaYXIAJRrazfMiWo.jpg&width=290&height=290&type=track",
       link: "/song/2",
       artistLink: "/artist/2",
+      album: "Album 2",
+      albumLink: "/album/2",
+      topGenre: "Pop"
     },
     {
       id: 3,
-      title: "Song Title 3",
-      artist: "Artist 3",
+      title: "Food",
+      artist: "AWOL",
       runtime: "3:20",
       albumCover:
         "https://freemusicarchive.org/image/?file=images%2Ftracks%2FTrack_-_2015110363828993&width=290&height=290&type=track",
-      link: "/song/3",
-      artistLink: "/artist/3",
+      link: "https://freemusicarchive.org/music/AWOL/AWOL_-_A_Way_Of_Life/Food/",
+      artistLink: "https://freemusicarchive.org/music/AWOL/",
+      album: "A Way Of Life",
+      albumLink: "https://freemusicarchive.org/music/AWOL/AWOL_-_A_Way_Of_Life",
+      topGenre: "Hip-Hop"
     },
   ],
   artists: [
