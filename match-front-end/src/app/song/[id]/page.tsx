@@ -53,7 +53,7 @@ const SongPage = () => {
 
         {/* Song Info */}
         <div className="flex flex-col items-start text-white w-full">
-          <h1 className="text-6xl font-extrabold text-[#ffb74d] text-left mb-4">{song.title}</h1>
+          <h1 className="text-6xl font-extrabold text-orange-400 text-left mb-4">{song.title}</h1>
           <h2 className="text-xl font-semibold text-left">{song.artist}</h2>
           <h3 className="text-lg font-semibold text-left ">{song.album}</h3>
           <p className="text-lg text-gray-400 text-left">{song.runtime}</p>

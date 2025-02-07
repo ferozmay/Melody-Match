@@ -51,7 +51,7 @@ def handle_request():
     query = request.args.get("query", None)
     limit = int(request.args.get("limit", 10))
 
-    track_query = False
+    track_query = True
 
     if query:
         # get results

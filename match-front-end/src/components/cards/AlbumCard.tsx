@@ -3,7 +3,7 @@ import React from "react";
 
 const AlbumCard = ({ album }: { album: Album }) => {
   return (
-    <div className="cursor-pointer w-52 hover:bg-white/10 bg-opacity-10 backdrop-blur-md rounded-lg hover:shadow-lg p-4 flex flex-col gap-4">
+    <div className="cursor-pointer w-52 hover:bg-white/10 bg-opacity-10 backdrop-blur-md rounded-lg hover:shadow-lg transition duration-300 p-4 flex flex-col gap-4">
       <img
         src={album.image}
         alt=""
