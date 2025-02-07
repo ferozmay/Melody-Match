@@ -5,9 +5,10 @@ const SongCard = ({ song }: { song: Song }) => {
   return (
     <div
       key={song.id}
-      className="select-none h-full flex items-start p-3 rounded-lg bg-white/10"
+      className="select-none flex items-start p-3 rounded-lg bg-white/10 w-1/3 h-full"
     >
       {/* Album Cover */}
+      
       <img
         src={song.albumCover}
         alt="Album Cover"
@@ -21,13 +22,7 @@ const SongCard = ({ song }: { song: Song }) => {
         <p className="">{song.artist}</p>
         <p className="text-gray-400">{song.runtime}</p>
       </div>
-      {/* View Details Button */}
-      <Link
-        href={`/song/${song.id}`}
-        className="self-end no-underline bg-[#ff0080] text-white py-[8px] px-[15px] rounded-[5px] transition-colors duration-300 hover:bg-[#ff3385]"
-      >
-        View Details
-      </Link>
+      
     </div>
   );
 };

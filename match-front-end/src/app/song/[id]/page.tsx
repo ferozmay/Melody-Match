@@ -3,6 +3,7 @@ import { useParams } from "next/navigation";
 import useApiSearch from "@/utils/api/search";
 import Link from "next/link";
 import SearchBar from "@/components/input/SearchBar";
+import SimilarSongs from "@/components/SimilarSongs";
 
 const SongPage = () => {
 
@@ -21,7 +22,6 @@ const SongPage = () => {
   const { query, setQuery, results } = useApiSearch();
   const song = results.songs.find((s) => s.id === songId)
 
-  
   if (!song) {
     return (
       <div className="text-red-400 p-4 text-center">
@@ -29,6 +29,8 @@ const SongPage = () => {
       </div>
     );
   }
+
+  const similarSongs = results.songs.filter((s) => s.id !== songId); // Exclude the current song from the similar songs
 
   return (
 
@@ -64,7 +66,15 @@ const SongPage = () => {
             </button>
           </Link>
         </div>
+
+     
+
       </div>
+           <div className="w-full mt-10 max-w-5xl mx-10  md:space-x-8">
+                {/* Display similar songs */}
+        <SimilarSongs similarSongs={similarSongs} />
+        </div>
+
     </div>
   );
 };
