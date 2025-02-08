@@ -3,7 +3,7 @@ app_start_time = time.time()
 import json
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
-from index.track_index import TrackIndex
+from index.index import Index
 from index.album_index import AlbumIndex
 import pickle, pandas as pd, time
 import threading
@@ -30,13 +30,11 @@ def load_index():
 
     global track_index, album_index
 
-    track_index = TrackIndex()
-    album_index = AlbumIndex()
+    track_index = Index()
     
     start_time = time.time()
 
-    track_index.load_track_index()
-    album_index.load_album_index()
+    track_index.load_index()
     print("Data loaded successfully! Time taken: ", time.time() - start_time)
 
 index_thread = threading.Thread(target=load_index)
@@ -51,7 +49,7 @@ def handle_request():
     query = request.args.get("query", None)
     limit = int(request.args.get("limit", 10))
 
-    track_query = False
+    track_query = True
 
     if query:
         # get results
@@ -71,21 +69,21 @@ def handle_request():
 
             data = track_ids_to_data(track_index.track_data, ranked_track_ids)
 
-        else:
-            album_results = simple_search(query, album_index.index)
-            collection_size = len(album_index.album_data)  # total number of albums
-            tfidf_scores = tfidf(query, album_index.index, collection_size)
+        # else:
+        #     album_results = simple_search(query, album_index.index)
+        #     collection_size = len(album_index.album_data)  # total number of albums
+        #     tfidf_scores = tfidf(query, album_index.index, collection_size)
             
-            # sort the results by tdidf score
-            ranked_results = sorted(
-                [(album_id, tfidf_scores.get(album_id, 0)) for album_id in album_results],  
-                key=lambda x: x[1],  
-                reverse=True
-            )
+        #     # sort the results by tdidf score
+        #     ranked_results = sorted(
+        #         [(album_id, tfidf_scores.get(album_id, 0)) for album_id in album_results],  
+        #         key=lambda x: x[1],  
+        #         reverse=True
+        #     )
 
-            ranked_album_ids = [album_id for album_id, _ in ranked_results][:limit]
+        #     ranked_album_ids = [album_id for album_id, _ in ranked_results][:limit]
 
-            data = album_ids_to_data(album_index.album_data, ranked_album_ids)
+        #     data = album_ids_to_data(album_index.album_data, ranked_album_ids)
 
         return data
 

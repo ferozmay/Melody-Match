@@ -2,13 +2,7 @@ match-api/data/
 venv/
 .venv/
 .DS_Store
-match-api/utils/__pycache__/text_processing.cpython-311.pyc
-match-api/index/__pycache__/index.cpython-311.pyc
-match-api/__pycache__/app.cpython-311.pyc
+match-api/utils/__pycache__/
+match-api/index/__pycache__/
+match-api/__pycache__/
 match-api/inverted-index.json
-match-api/__pycache__/ranking.cpython-311.pyc
-match-api/__pycache__/search.cpython-311.pyc
-match-api/index/__pycache__/album_index.cpython-311.pyc
-match-api/index/__pycache__/clean_store_load.cpython-311.pyc
-match-api/index/__pycache__/track_index.cpython-311.pyc
-match-api/utils/__pycache__/ids_to_data.cpython-311.pyc
