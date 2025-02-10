@@ -15,8 +15,8 @@ const MusicSearchTab = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-custom-gradient bg-fixed bg-cover">
-      <div className="flex items-center gap-4 hover:scale-110 transition-transform -mt-20">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-custom-gradient bg-fixed bg-cover -mt-10">
+      <div className="flex items-center gap-4 transition-transform -mt-20">
         <div className="items-center px-4 py-4 ring-1 ring-gray-900/5 rounded-lg leading-none flex justify-center space-x-5">
           <img src="/audio-waves.png" alt="Logo" className="h-36 w-36" />
           <h1 className="text-center text-transparent text-7xl font-black animate-gradient">
@@ -26,10 +26,10 @@ const MusicSearchTab = () => {
       </div>
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-2xl rounded-lg shadow-lg p-2 transition duration-300 flex flex-col gap-4"
+        className="w-full max-w-2xl rounded-lg p-2 transition duration-300 flex flex-col gap-4"
       >
         
-        <div className="bg-white bg-opacity-20 backdrop-blur-md hover:shadow-2xl focus-within:shadow-2xl flex items-center gap-2">
+        <div className="bg-white bg-opacity-20 backdrop-blur-md focus-within:shadow-2xl flex items-center gap-2">
           <input
             type="text"
             value={searchQuery}
