@@ -1,9 +1,6 @@
 "use client"
 import { useParams } from "next/navigation";
 import useApiSearch from "@/utils/api/search";
-import Link from "next/link";
-import SimilarSongs from "@/components/SimilarSongs";
-import SearchBar from "@/components/input/SearchBar"; // Optional, if you want a search bar
 
 const ArtistPage = () => {
   const { id } = useParams();

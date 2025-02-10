@@ -1,9 +1,10 @@
 import { Album } from "@/utils/types/album";
 import React from "react";
+import Link from "next/link";
 
 const AlbumCard = ({ album }: { album: Album }) => {
   return (
-    <div className="cursor-pointer w-52 hover:bg-white/10 bg-opacity-10 backdrop-blur-md rounded-lg hover:shadow-lg transition duration-300 p-4 flex flex-col gap-4">
+    <Link href={`/album/${album.id}`} className="cursor-pointer w-52 hover:bg-white/10 bg-opacity-10 backdrop-blur-md rounded-lg hover:shadow-lg transition duration-300 p-4 flex flex-col gap-4">
       <img
         src={album.image}
         alt=""
@@ -15,7 +16,7 @@ const AlbumCard = ({ album }: { album: Album }) => {
         </p>
         <p className="text-gray-400">{album.artist}</p>
       </div>
-    </div>
+    </Link>
   );
 };
 

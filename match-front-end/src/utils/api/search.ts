@@ -74,6 +74,7 @@ const placeholderResults = {
       image:
         "https://freemusicarchive.org/image/?file=images%2Fartists%2FPaul_Flaherty_Chris_Corsano_Okkyung_Lee_-_20100830113029354.jpg&width=290&height=290&type=artist",
       link: "https://freemusicarchive.org/music/AWOL/",
+      releaseDate: "2025-01-11",
     },
   ],
   albums: [
@@ -94,6 +95,7 @@ const placeholderResults = {
       image:
         "https://freemusicarchive.org/image/?file=artist_image%2FLTz74ufAzu3es9s8VHdIAPZmcOzeguSWaCK0M5ei.png&width=290&height=290&type=artist",
       link: "/album/2",
+      
     },
     {
       id: 3,
@@ -103,6 +105,7 @@ const placeholderResults = {
       image:
         "https://freemusicarchive.org/image/?file=album_image%2FUuBtjUe0HDSyD4KSdr92wUpYXmjpOLmDm2gxJJVt.jpg&width=290&height=290&type=album",
       link: "/album/3",
+      releaseDate: "2007-10-05",
     },
   ],
 };
