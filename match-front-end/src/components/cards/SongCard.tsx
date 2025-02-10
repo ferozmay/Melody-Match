@@ -1,4 +1,4 @@
-import { Song } from "@/app/utils/types";
+import { Song } from "@/utils/types/song";
 import Link from "next/link";
 
 const SongCard = ({ song }: { song: Song }) => {
