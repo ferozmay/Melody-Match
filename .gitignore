@@ -1,0 +1,8 @@
+match-api/data/
+venv/
+.venv/
+.DS_Store
+match-api/utils/__pycache__/text_processing.cpython-311.pyc
+match-api/index/__pycache__/index.cpython-311.pyc
+match-api/__pycache__/app.cpython-311.pyc
+match-api/inverted-index.json
