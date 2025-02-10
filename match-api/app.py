@@ -4,10 +4,9 @@ import json
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
 from index.index import Index
-from index.album_index import AlbumIndex
 import pickle, pandas as pd, time
 import threading
-from search import simple_search
+from search import search_rank
 from ranking import tfidf
 from utils.ids_to_data import track_ids_to_data, album_ids_to_data
 
@@ -20,21 +19,14 @@ cors = CORS(
     resources={r"/api/*": {"origins": ["http://localhost:5173", "http://10.124.114.40:5173"]}}
 )
 
-# # load the index
-# start_time = time.time()
-# song_title_index = TrackIndex()
-# song_title_index.load_index()
-# print("Data loaded successfully! Time taken: ", time.time() - start_time)
 
 def load_index():
 
-    global track_index, album_index
-
-    track_index = Index()
+    global index
+    index = Index()
     
     start_time = time.time()
-
-    track_index.load_index()
+    index.load_index()
     print("Data loaded successfully! Time taken: ", time.time() - start_time)
 
 index_thread = threading.Thread(target=load_index)
@@ -49,42 +41,24 @@ def handle_request():
     query = request.args.get("query", None)
     limit = int(request.args.get("limit", 10))
 
-    track_query = True
 
     if query:
-        # get results
-        if track_query:
-            track_results = simple_search(query, track_index.index)
-            collection_size = len(track_index.track_data)  # total number of tracks
-            tfidf_scores = tfidf(query, track_index.index, collection_size)
-            
-            # sort the results by tdidf score
-            ranked_results = sorted(
-                [(track_id, tfidf_scores.get(track_id, 0)) for track_id in track_results],  
-                key=lambda x: x[1],  
-                reverse=True
-            )
+        collection_size = len(index.track_data)  # total number of tracks
+        track_scores, album_scores, artist_scores = search_rank(query, index.index, collection_size)
+        
+        # temporarily just ordered based on the title score
+        sorted_track_scores = sorted(track_scores.items(), key=lambda item: item[1][0], reverse=True)
+        sorted_album_scores = sorted(album_scores.items(), key=lambda item: item[1][0], reverse=True)
+        sorted_artist_scores = sorted(artist_scores.items(), key=lambda item: item[1][0], reverse=True)
 
-            ranked_track_ids = [track_id for track_id, _ in ranked_results][:limit] 
+        ranked_track_ids = [track_id for track_id, _ in sorted_track_scores][:limit] 
+        ranked_album_ids = [album_id for album_id, _ in sorted_album_scores][:limit]
+        ranked_artist_ids = [artist_id for artist_id, _ in sorted_artist_scores][:limit]
 
-            data = track_ids_to_data(track_index.track_data, ranked_track_ids)
+        track_data = track_ids_to_data(index.track_data, ranked_track_ids)
+        album_data = album_ids_to_data(index.album_data, ranked_album_ids)
+        # we don't have an artist ids to data function yet
 
-        # else:
-        #     album_results = simple_search(query, album_index.index)
-        #     collection_size = len(album_index.album_data)  # total number of albums
-        #     tfidf_scores = tfidf(query, album_index.index, collection_size)
-            
-        #     # sort the results by tdidf score
-        #     ranked_results = sorted(
-        #         [(album_id, tfidf_scores.get(album_id, 0)) for album_id in album_results],  
-        #         key=lambda x: x[1],  
-        #         reverse=True
-        #     )
-
-        #     ranked_album_ids = [album_id for album_id, _ in ranked_results][:limit]
-
-        #     data = album_ids_to_data(album_index.album_data, ranked_album_ids)
-
-        return data
+        return {'songs': track_data, 'albums' :album_data}
 
     return []

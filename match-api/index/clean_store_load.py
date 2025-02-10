@@ -321,6 +321,7 @@ def create_inverted_index(entire_dfs, entire_pp_dfs):
 
 
 def store_data():
+    # writing all the data frames and the inverted index to file
     track_data, album_data, artist_data, genres_data = clean_and_make_data()
     entire_dfs = (track_data, album_data, artist_data, genres_data)
     pp_track_data, pp_album_data, pp_artist_data, pp_genres_data = process_data(entire_dfs)
@@ -336,24 +337,13 @@ def store_data():
         pickle.dump(inverted_index, f)
 
 def load_data():
+    # for the time being only loading the track data, album data, artist data and inverted index
     track_data = pd.read_hdf('data/stored_data/dataframes.h5', key='track_data_df')
     album_data = pd.read_hdf('data/stored_data/dataframes.h5', key='album_data_df')
     artist_data = pd.read_hdf('data/stored_data/dataframes.h5', key='artist_data_df')
     with open("data/stored_data/inverted_index.pkl", "rb") as f:
         inverted_index = pickle.load(f)
     return track_data, album_data, artist_data, inverted_index
-
-def load_album_data():
-    pass
-
-def display_csv():
-    track_data = pd.read_csv('data/fma_metadata/raw_albums.csv')
-    print(track_data.columns)
-    # print(track_data[('artist_name')])
-    # print(len(set(track_data[('genre_handle', 'Avant-Garde')].apply(process_text))) == len(set(track_data[('genre_handle', 'Avant-Garde')].apply(process_text))))
-    # print(track_data[[('track', 'tags'), ('artist', 'tags'), ('album', 'tags')]].apply(set).apply(len))
-    print(track_data.head())	
-
 
 
 if __name__ == "__main__":
