@@ -1,4 +1,5 @@
 import { Song } from "@/app/utils/types";
+import { BioRhyme } from "next/font/google";
 import { useEffect, useState } from "react";
 
 const placeholderResults = {
@@ -57,6 +58,7 @@ const placeholderResults = {
       image:
         "https://freemusicarchive.org/image/?file=images%2Fartists%2FParalyze_Humanity_Sequence_-_20100727101423586.jpg&width=290&height=290&type=artist",
       link: "https://freemusicarchive.org/music/Happy_Prescriptions/",
+      bio: "Happy Prescriptions is a band from the United States.",
     },
     {
       id: 2,
@@ -64,6 +66,7 @@ const placeholderResults = {
       image:
         "https://freemusicarchive.org/image/?file=images%2Fartists%2FWoollen_Kits_-_2012071850826651.jpg&width=290&height=290&type=artist",
       link: "https://freemusicarchive.org/music/Jahzzar/",
+      bio: "Jahzzar is a musician from Spain.",
     },
     {
       id: 3,

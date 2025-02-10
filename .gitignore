@@ -51,3 +51,4 @@ match-api/inverted-index.json
 # virtual environments
 venv/
 .venv/
+.DS_Store
