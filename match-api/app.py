@@ -16,7 +16,7 @@ app = Flask(__name__)
 # Set up CORS to prevent blockage of requests from local domains
 cors = CORS(
     app, 
-    resources={r"/api/*": {"origins": ["http://localhost:5173", "http://10.124.114.40:5173"]}}
+    resources={r"/api/*": {"origins": ["http://localhost:3000", "http://10.124.114.40:5173"]}}
 )
 
 
@@ -36,7 +36,7 @@ index_thread.join()
 app_end_time = time.time()
 print("App loaded successfully! Time taken: ", app_end_time - app_start_time)
 
-@app.route("/api/track")
+@app.route("/api/search")
 def handle_request():
     query = request.args.get("query", None)
     limit = int(request.args.get("limit", 10))
@@ -47,9 +47,10 @@ def handle_request():
         track_scores, album_scores, artist_scores = search_rank(query, index.index, collection_size)
         
         # temporarily just ordered based on the title score
-        sorted_track_scores = sorted(track_scores.items(), key=lambda item: item[1][0], reverse=True)
-        sorted_album_scores = sorted(album_scores.items(), key=lambda item: item[1][0], reverse=True)
-        sorted_artist_scores = sorted(artist_scores.items(), key=lambda item: item[1][0], reverse=True)
+        print(list(track_scores.items())[:10])
+        sorted_track_scores = sorted(track_scores.items(), key=lambda item: item[0], reverse=True)
+        sorted_album_scores = sorted(album_scores.items(), key=lambda item: item[0], reverse=True)
+        sorted_artist_scores = sorted(artist_scores.items(), key=lambda item: item[0], reverse=True)
 
         ranked_track_ids = [track_id for track_id, _ in sorted_track_scores][:limit] 
         ranked_album_ids = [album_id for album_id, _ in sorted_album_scores][:limit]
@@ -59,6 +60,6 @@ def handle_request():
         album_data = album_ids_to_data(index.album_data, ranked_album_ids)
         # we don't have an artist ids to data function yet
 
-        return {'songs': track_data, 'albums' :album_data}
+        return {'songs': json.loads(track_data), 'albums' : json.loads(album_data)}
 
     return []

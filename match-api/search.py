@@ -48,7 +48,7 @@ def search_rank(query: str, index, collection_size: int):
                     continue        
         #track dictionary
         track_keys = set(track_title_scores.keys()) | set(track_genres_scores.keys()) | set(track_tags_scores.keys())
-        track_scores = {doc_id: {'Name' : track_title_scores.get(doc_id, 0), 'Genres' : track_genres_scores.get(doc_id, 0), 'Tags' : track_tags_scores.get(doc_id, 0)} for doc_id in track_keys}
+        track_scores = {doc_id: (track_title_scores.get(doc_id, 0), track_genres_scores.get(doc_id, 0), track_tags_scores.get(doc_id, 0)) for doc_id in track_keys}
         #album dictionary
         album_keys = set(album_title_scores.keys()) | set(album_genres_scores.keys()) | set(album_tags_scores.keys())
         album_scores = {doc_id: (album_title_scores.get(doc_id, 0),  album_genres_scores.get(doc_id, 0),  album_tags_scores.get(doc_id, 0)) for doc_id in album_keys}
@@ -68,7 +68,7 @@ def rank_titles(term, index, object_type, collection_size, scores):
     # and then all of those three things have genres and tags
     title_doc_ids = []
     df = index[term][object_type]['Name']['doc_freq'] 
-    title_doc_ids.append(set(index[term][object_type]['Name']['doc_ids'].keys()))
+    title_doc_ids.extend(set(index[term][object_type]['Name']['doc_ids'].keys()))
     for doc_id in title_doc_ids:
         if doc_id not in scores:
             scores[doc_id] = 0
@@ -82,8 +82,9 @@ def rank_titles(term, index, object_type, collection_size, scores):
     return scores
 
 def rank_genres(term , index, object_type, collection_size, scores):
-    genres_dict = index[term][object_type]['Genres']['doc_ids']
-    df = index[term][object_type]['Genres']['doc_freq']
+    print(index[term][object_type].keys())
+    genres_dict = index[term][object_type]['Genre']['doc_ids']
+    df = index[term][object_type]['Genre']['doc_freq']
     for doc_id in genres_dict:
         if doc_id not in scores:
             scores[doc_id] = 0
@@ -105,8 +106,8 @@ def rank_genres(term , index, object_type, collection_size, scores):
     return scores
 
 def rank_tags(term , index, object_type, collection_size, scores):
-    tags_doc_ids = index[term][object_type]['Tags']['doc_ids']
-    df = index[term][object_type]['Tags']['doc_freq']
+    tags_doc_ids = index[term][object_type]['Tag']['doc_ids']
+    df = index[term][object_type]['Tag']['doc_freq']
     for doc_id in tags_doc_ids:
         if doc_id not in scores:
             scores[doc_id] = 0

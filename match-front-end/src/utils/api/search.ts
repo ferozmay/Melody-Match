@@ -1,5 +1,5 @@
-import { Song } from "@/app/utils/types";
 import { useEffect, useState } from "react";
+import { SEARCH_URL } from "./const";
 
 const placeholderResults = {
   songs: [
@@ -86,30 +86,31 @@ const placeholderResults = {
 };
 
 const useApiSearch = () => {
-  const [results, setResults] = useState(placeholderResults);
+  const [results, setResults] = useState([]);
   const [query, setQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    // if (searchQuery) {
-    //   setLoading(true);
-    //   fetch(`${TITLE_URL}?query=${encodeURIComponent(searchQuery)}`, {
-    //     headers: {
-    //       "Access-Control-Allow-Origin": "*",
-    //     },
-    //   })
-    //     .then((response) => response.json())
-    //     .then((data) => {
-    //       setResults(data);
-    //       setLoading(false);
-    //     })
-    //     .catch((error) => {
-    //       console.error(error);
-    //       setLoading(false);
-    //     });
-    // } else {
-    //   setLoading(false);
-    // }
+    if (query) {
+      setLoading(true);
+      fetch(`${SEARCH_URL}?query=${encodeURIComponent(query)}`, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          setResults(data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
 
     setLoading(true);
     const timer = setTimeout(() => {
