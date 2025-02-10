@@ -27,4 +27,10 @@ wget http://millionsongdataset.com/sites/default/files/lastfm/tracks_with_simila
 wget http://millionsongdataset.com/sites/default/files/lastfm/lastfm_subset.zip
 unzip lastfm_subset.zip 
 rm lastfm_subset.zip
+
+# Download a 1% subset of all MSD
+wget http://labrosa.ee.columbia.edu/~dpwe/tmp/millionsongsubset.tar.gz
+
+# Download only metadata from MSD
+wget http://millionsongdataset.com/sites/default/files/AdditionalFiles/msd_summary_file.h5
 ```
