@@ -6,15 +6,15 @@ def search_rank(query: str, index, collection_size: int):
 
         query_tokens = process_text(query).split()
 
-        track_title_scores = {}
-        album_title_scores = {}
-        artist_title_scores = {}
-        track_genres_scores = {}
-        album_genres_scores = {}
-        artist_genres_scores = {}
-        track_tags_scores = {}
-        album_tags_scores = {}
-        artist_tags_scores = {}
+        track_title_scores = dict()
+        album_title_scores = dict()
+        artist_title_scores = dict()
+        track_genres_scores = dict()
+        album_genres_scores = dict()
+        artist_genres_scores = dict()
+        track_tags_scores = dict()
+        album_tags_scores = dict()
+        artist_tags_scores = dict()
 
         object_types = ['Track', 'Album', 'Artist']
         document_types = ['Name', 'Genres', 'Tags']
@@ -48,7 +48,7 @@ def search_rank(query: str, index, collection_size: int):
                     continue        
         #track dictionary
         track_keys = set(track_title_scores.keys()) | set(track_genres_scores.keys()) | set(track_tags_scores.keys())
-        track_scores = {doc_id: {'Name' : track_title_scores.get(doc_id, 0), 'Genres' : track_genres_scores.get(doc_id, 0), 'Tags' : track_tags_scores.get(doc_id, 0)} for doc_id in track_keys}
+        track_scores = {doc_id: (track_title_scores.get(doc_id, 0), track_genres_scores.get(doc_id, 0), track_tags_scores.get(doc_id, 0)) for doc_id in track_keys}
         #album dictionary
         album_keys = set(album_title_scores.keys()) | set(album_genres_scores.keys()) | set(album_tags_scores.keys())
         album_scores = {doc_id: (album_title_scores.get(doc_id, 0),  album_genres_scores.get(doc_id, 0),  album_tags_scores.get(doc_id, 0)) for doc_id in album_keys}
@@ -57,7 +57,7 @@ def search_rank(query: str, index, collection_size: int):
         artist_scores = {doc_id: (artist_title_scores.get(doc_id, 0), artist_genres_scores.get(doc_id, 0),  artist_tags_scores.get(doc_id, 0)) for doc_id in artist_keys}
         return track_scores, album_scores, artist_scores
 
-def rank_titles(term, index, object_type, collection_size, scores):
+def rank_titles(term, index, object_type, collection_size, scores:dict):
     # ranking with tfidf for time being
     # for each query term, calculate the weight of the term in each document
     # weight_t,d = (1 + log _10 tf (t,d) * log _10 (N/df(t))
@@ -66,11 +66,11 @@ def rank_titles(term, index, object_type, collection_size, scores):
     # N = total number of documents in the collection
     # collection size for all document types is the same since we are assuming all tracks have an album, artist
     # and then all of those three things have genres and tags
-    title_doc_ids = []
+    
     df = index[term][object_type]['Name']['doc_freq'] 
-    title_doc_ids.append(set(index[term][object_type]['Name']['doc_ids'].keys()))
+    title_doc_ids = set(index[term][object_type]['Name']['doc_ids'].keys())
     for doc_id in title_doc_ids:
-        if doc_id not in scores:
+        if doc_id not in scores.keys():
             scores[doc_id] = 0
         tf = len(index[term][object_type]['Name']['doc_ids'][doc_id]) 
         # skip if tf or df are zero to prevent math errors
@@ -81,11 +81,11 @@ def rank_titles(term, index, object_type, collection_size, scores):
         scores[doc_id] += (1 + math.log10(tf)) * math.log10(collection_size / df)
     return scores
 
-def rank_genres(term , index, object_type, collection_size, scores):
-    genres_dict = index[term][object_type]['Genres']['doc_ids']
-    df = index[term][object_type]['Genres']['doc_freq']
+def rank_genres(term , index, object_type, collection_size, scores:dict):
+    genres_dict = index[term][object_type]['Genre']['doc_ids']
+    df = index[term][object_type]['Genre']['doc_freq']
     for doc_id in genres_dict:
-        if doc_id not in scores:
+        if doc_id not in scores.keys():
             scores[doc_id] = 0
         # here I am making our own version of a tf(t,d)
         # for every object type eg track, artist, album, a genre can only appear once
@@ -104,11 +104,11 @@ def rank_genres(term , index, object_type, collection_size, scores):
         scores[doc_id] += (1 + tf) * math.log10(collection_size / df)
     return scores
 
-def rank_tags(term , index, object_type, collection_size, scores):
-    tags_doc_ids = index[term][object_type]['Tags']['doc_ids']
-    df = index[term][object_type]['Tags']['doc_freq']
+def rank_tags(term , index, object_type, collection_size, scores:dict):
+    tags_doc_ids = index[term][object_type]['Tag']['doc_ids']
+    df = index[term][object_type]['Tag']['doc_freq']
     for doc_id in tags_doc_ids:
-        if doc_id not in scores:
+        if doc_id not in scores.keys():
             scores[doc_id] = 0
 
         # for the time being we will leave the tf score as one but this could be used to change the weighting when a track, artist or album is more of a certain tag than others

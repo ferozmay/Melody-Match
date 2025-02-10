@@ -35,6 +35,22 @@ def fix_album_cover_url(data_df, track_or_album_id, album=False):
         return placeholder
     return actual_url
 
+def fix_artist_image_url(data_df, artist_id):
+    artist_info =  data_df.loc[artist_id]
+    artist_image_path = artist_info[("artist_image_file")]
+
+    placeholder = 'https://vevmo.com/sites/default/files/upload/woman-question-mark_0.jpg'
+
+    if isinstance(artist_image_path, float) and np.isnan(artist_image_path):
+        return placeholder
+
+    if 'artists' in artist_image_path:
+        actual_url = artist_image_path.replace("file/images/artists/", "image/?file=images%2Fartists%2F")
+        actual_url = actual_url + "&width=290&height=290&type=artist"
+    
+    else:
+        return placeholder
+    return actual_url
 
 def clean_track_data():
     track_data = pd.read_csv('data/fma_metadata/tracks.csv', index_col=0, header=[0, 1]) # warning: code later relies on the track id being the index
@@ -119,8 +135,6 @@ def make_album_data(track_data):
 def make_artist_data(track_data):
     artist_data = pd.read_csv('data/fma_metadata/raw_artists.csv')
 
-    # fix image urls
-    # INSERT
 
     # make a copy of the track data we care about
     temp_track_data = track_data[[('artist', 'name'), ('track', 'title'), ('track', 'genres'), ('track', 'genres_all'), ('track', 'genre_top'), ('album', 'id')]].copy()
@@ -152,6 +166,8 @@ def make_artist_data(track_data):
     # resetting the index to be the artist id (optional)
     artist_data.set_index('artist_id', inplace=True)
     
+    # fix image urls
+    artist_data[("artist_image_file")] = artist_data.index.map(lambda x: fix_artist_image_url(artist_data, x))
     return artist_data
 
 def create_genre_dict(genre_list, threshold=0.3):
@@ -347,5 +363,11 @@ def load_data():
 
 
 if __name__ == "__main__":
-    store_data()
-    print("Data stored successfully!")
+    # store_data()
+    # print("Data stored successfully!")
+    track_data, album_data, artist_data, _ = clean_and_make_data()
+    print(track_data[[("track", "title"),("artist", "name"), ("track", "duration"), ("track", "track_image_file"), ("track","track_url"), ("track", "artist_url"), ("album", "title"),("track", "album_url")]])
+    print(album_data[[("album_title"), ("artist_name"), ('album_date_released') ,("album_tracks"), ("album_image_file"), ("album_url")]])
+    print(track_data.columns)
+    print(artist_data.head(), artist_data.columns)
+    print(album_data.head(), album_data.columns)
