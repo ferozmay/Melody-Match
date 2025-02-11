@@ -6,22 +6,6 @@ def handle_nan(value):
         return None
     return value
 
-def album_ids_to_data(album_data, album_ids):
-    data = []
-    for album_id in album_ids:
-        album_info = album_data.loc[album_id]
-
-        data.append({
-            "id": album_id,
-            "title": handle_nan(album_info[("album_title")]),
-            "artist": handle_nan(album_info[("artist_name")]),
-            "releaseDate": handle_nan(album_info[("album_date_released")]),
-            "albumCover": handle_nan(album_info[("album_image_file")]),
-            "noOfTracks": handle_nan(album_info[("album_tracks")]),
-            "link": handle_nan(album_info[("album_url")])
-        })
-
-    return json.dumps(data, default=str)
 
 def track_ids_to_data(track_data, track_ids):
     data = []
@@ -43,3 +27,33 @@ def track_ids_to_data(track_data, track_ids):
 
     return json.dumps(data, default=str)
 
+def album_ids_to_data(album_data, album_ids):
+    data = []
+    for album_id in album_ids:
+        album_info = album_data.loc[album_id]
+
+        data.append({
+            "id": album_id,
+            "title": handle_nan(album_info[("album_title")]),
+            "artist": handle_nan(album_info[("artist_name")]),
+            "releaseDate": handle_nan(album_info[("album_date_released")]),
+            "albumCover": handle_nan(album_info[("album_image_file")]),
+            "noOfTracks": handle_nan(album_info[("album_tracks")]),
+            "link": handle_nan(album_info[("album_url")])
+        })
+
+    return json.dumps(data, default=str)
+
+def artist_ids_to_data(artist_data, artist_ids):
+    data = []
+    for artist_id in artist_ids:
+        artist_info = artist_data.loc[artist_id]
+
+        data.append({
+            "id": artist_id,
+            "name": handle_nan(artist_info[("artist_name")]),
+            "artistImage" : handle_nan(artist_info[("artist_image_file")]),
+            "link": handle_nan(artist_info[("artist_url")]),
+        })
+        
+    return json.dumps(data, default=str)

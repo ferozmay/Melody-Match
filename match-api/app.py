@@ -8,7 +8,7 @@ import pickle, pandas as pd, time
 import threading
 from search import search_rank
 from ranking import tfidf
-from utils.ids_to_data import track_ids_to_data, album_ids_to_data
+from utils.ids_to_data import track_ids_to_data, album_ids_to_data, artist_ids_to_data
 
 # init the app
 app = Flask(__name__)
@@ -47,7 +47,6 @@ def handle_request():
         track_scores, album_scores, artist_scores = search_rank(query, index.index, collection_size)
         
         # temporarily just ordered based on the title score
-        print(list(track_scores.items())[:10])
         sorted_track_scores = sorted(track_scores.items(), key=lambda item: item[0], reverse=True)
         sorted_album_scores = sorted(album_scores.items(), key=lambda item: item[0], reverse=True)
         sorted_artist_scores = sorted(artist_scores.items(), key=lambda item: item[0], reverse=True)
@@ -55,11 +54,10 @@ def handle_request():
         ranked_track_ids = [track_id for track_id, _ in sorted_track_scores][:limit] 
         ranked_album_ids = [album_id for album_id, _ in sorted_album_scores][:limit]
         ranked_artist_ids = [artist_id for artist_id, _ in sorted_artist_scores][:limit]
-
         track_data = track_ids_to_data(index.track_data, ranked_track_ids)
         album_data = album_ids_to_data(index.album_data, ranked_album_ids)
-        # we don't have an artist ids to data function yet
+        artist_data = artist_ids_to_data(index.artist_data, ranked_artist_ids)
 
-        return {'songs': json.loads(track_data), 'albums' : json.loads(album_data)}
+        return {'songs': track_data, 'albums' :album_data, 'artists': artist_data}
 
     return []
