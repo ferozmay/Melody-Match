@@ -17,7 +17,7 @@ app = Flask(__name__)
 # Set up CORS to prevent blockage of requests from local domains
 cors = CORS(
     app, 
-    resources={r"/api/*": {"origins": ["http://localhost:5173", "http://10.124.114.40:5173"]}}
+    resources={r"/api/*": {"origins": ["http://localhost:3000"]}}
 )
 
 # # load the index
@@ -46,7 +46,7 @@ index_thread.join()
 app_end_time = time.time()
 print("App loaded successfully! Time taken: ", app_end_time - app_start_time)
 
-@app.route("/api/track")
+@app.route("/api/search")
 def handle_request():
     query = request.args.get("query", None)
     limit = int(request.args.get("limit", 10))
@@ -87,6 +87,6 @@ def handle_request():
 
             data = album_ids_to_data(album_index.album_data, ranked_album_ids)
 
-        return data
+        return {"songs":json.loads(data)}
 
-    return []
+    return {}
