@@ -7,7 +7,6 @@ from index.index_class import Index
 import pickle, pandas as pd, time
 import threading
 from search_rank import search_rank
-from ranking import tfidf
 from utils.ids_to_data import track_ids_to_data, album_ids_to_data, artist_ids_to_data
 
 # init the app
