@@ -1,5 +1,4 @@
-match-api/data/fma_metadata
-match-api/data/stored_data
+match-api/data/
 venv/
 .venv/
 .DS_Store
