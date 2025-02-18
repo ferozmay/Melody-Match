@@ -1,5 +1,14 @@
 similarity_research/data/FMA
 similarity_research/data/MSD
-venv
 similarity_research/models/FMA_similarity_dict.json
+
 *.mp3
+match-api/data/
+venv/
+.venv/
+.DS_Store
+match-api/utils/__pycache__/
+match-api/index/__pycache__/
+match-api/__pycache__/
+match-api/inverted-index.json
+node_modules/

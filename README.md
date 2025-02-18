@@ -1,7 +1,6 @@
-# Melody-Match
-Melody Match: Match any vibe with free music!
-
-<div style="display: flex; align-items: center; justify-content: space-between;">
-<!--     <p>Melody Match: Match any vibe with free music!</p> -->
-    <img src="melody_match_image.jpeg" alt="Melody Match Logo" style="width: 150px; height: auto;">
+<div style="display: flex; align-items: center;">
+  <img src="logo.png" alt="Melody Match Logo" style="width: 70px; height: auto; margin-right: 10px;">
+  <h1><code>Melody-Match</code></h1>
 </div>
+
+Melody Match: Match any vibe with free music!
