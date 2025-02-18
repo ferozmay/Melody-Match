@@ -3,4 +3,5 @@ export type Artist = {
     name: string;
     image: string;
     link: string;
+    bio: string;
 }

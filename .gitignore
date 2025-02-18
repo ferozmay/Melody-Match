@@ -1,14 +1,68 @@
-similarity_research/data/FMA
-similarity_research/data/MSD
-similarity_research/models/FMA_similarity_dict.json
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-*.mp3
-match-api/data/
-venv/
-.venv/
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
 .DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# byte-compiled
+**/__pycache__/
+*.pyc
+
+# data
+match-api/data/
+match-api/inverted-index.json
 match-api/utils/__pycache__/
 match-api/index/__pycache__/
 match-api/__pycache__/
 match-api/inverted-index.json
 node_modules/
+node_modules/
+
+# Similarity data
+similarity_research/data/FMA
+similarity_research/data/MSD
+similarity_research/models/FMA_similarity_dict.json
+*.mp3
+
+# virtual environments
+venv/
+.venv/
+.DS_Store
+
+

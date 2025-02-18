@@ -73,7 +73,7 @@ export default function SearchResultsPage() {
         {/* Search results */}
         <div className="w-full flex justify-center">
           {loading ? (
-            <div className="h-48 flex items-center my-auto text-[#FFB74D] text-3xl">
+            <div className="h-48 flex items-center my-auto text-orange-400 text-3xl">
               Loading...
             </div>
           ) : (

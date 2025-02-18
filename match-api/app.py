@@ -40,6 +40,7 @@ def handle_request():
     query = request.args.get("query", None)
     limit = int(request.args.get("limit", 10))
 
+    track_query = True
 
     if query:
         collection_size = len(index.track_data)  # total number of tracks
