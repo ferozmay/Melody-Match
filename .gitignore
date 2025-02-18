@@ -1,3 +1,5 @@
 similarity_research/data/FMA
 similarity_research/data/MSD
 venv
+similarity_research/models/FMA_similarity_dict.json
+*.mp3
