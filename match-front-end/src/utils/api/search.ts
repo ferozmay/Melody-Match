@@ -124,8 +124,8 @@ const useApiSearch = () => {
       })
         .then((response) => response.json())
         .then((data) => {
-          setResults(data);
           console.log(data);
+          setResults(data);
           setLoading(false);
         })
         .catch((error) => {

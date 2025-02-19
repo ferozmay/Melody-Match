@@ -1,1 +1,1 @@
-python -m index.clean_store_load
+python -m index.store_load
