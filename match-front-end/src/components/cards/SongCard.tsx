@@ -30,7 +30,7 @@ const SongCard = ({
         />
 
         {/* Song Info */}
-        <div className="w-full flex flex-col items-start">
+        <div className="w-full flex flex-col items-start overflow-hidden ">
           <h3 className="text-xl font-bold text-orange-400 hover:text-orange-300 line-clamp-2">
             {song.title}
           </h3>

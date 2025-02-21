@@ -9,6 +9,8 @@ def handle_nan(value):
 
 def track_ids_to_data(track_data, track_ids):
     data = []
+    if not isinstance(track_ids, list):
+        track_ids = [track_ids]
 
     for track_id in track_ids:
         track_info = track_data.loc[track_id]
@@ -25,11 +27,17 @@ def track_ids_to_data(track_data, track_ids):
             "albumLink": handle_nan(track_info[("track", "album_url")]),
             "topGenre": handle_nan(track_info[("track", "genre_top")])
         })
-
+    
+    if len(data) == 1:
+        return json.dumps(data[0], default=str)
     return json.dumps(data, default=str)
 
 def album_ids_to_data(album_data, album_ids):
     data = []
+
+    if not isinstance(album_ids, list):
+        album_ids = [album_ids]
+
     for album_id in album_ids:
         album_info = album_data.loc[album_id]
 
@@ -42,11 +50,15 @@ def album_ids_to_data(album_data, album_ids):
             "noOfTracks": handle_nan(album_info[("album_tracks")]),
             "link": handle_nan(album_info[("album_url")])
         })
-
+    
+    if len(data) == 1:
+        return json.dumps(data[0], default=str)
     return json.dumps(data, default=str)
 
 def artist_ids_to_data(artist_data, artist_ids):
     data = []
+    if not isinstance(artist_ids, list):
+        artist_ids = [artist_ids]
     for artist_id in artist_ids:
         artist_info = artist_data.loc[artist_id]
 
@@ -56,5 +68,6 @@ def artist_ids_to_data(artist_data, artist_ids):
             "artistImage" : handle_nan(artist_info[("artist_image_file")]),
             "link": handle_nan(artist_info[("artist_url")]),
         })
-        
+    if len(data) == 1:
+        return json.dumps(data[0], default=str)
     return json.dumps(data, default=str)

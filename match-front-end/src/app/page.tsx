@@ -8,7 +8,7 @@ import useDebounce from "@/utils/hooks/debounce";
 const MusicSearchTab = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const debouncedSearchQuery = useDebounce(searchQuery, 250);
 
   useEffect(() => {
     if (debouncedSearchQuery.trim()) {

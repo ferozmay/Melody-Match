@@ -12,6 +12,7 @@ const SearchBar = ({ searchInput, setSearchInput }: SearchBarProps) => {
       className="w-full max-w-2xl bg-white text-white bg-opacity-20 backdrop-blur-md rounded-lg shadow-lg p-2 transition duration-300 hover:shadow-2xl focus-within:shadow-2xl flex items-center gap-2"
       role="search"
       aria-label="Search"
+      onSubmit={(e) => e.preventDefault()}
       //   onSubmit={handleSubmit}
     >
       <input

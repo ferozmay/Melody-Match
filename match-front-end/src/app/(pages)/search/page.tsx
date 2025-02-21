@@ -54,6 +54,12 @@ export default function SearchResultsPage() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    if (query) {
+      router.push(`/search?q=${query}`);
+    }
+  }, [query]);
+
   return (
     <div className="flex flex-col items-center gap-8">
       <div className="w-[80%] mx-auto text-white">

@@ -11,5 +11,5 @@ export type Song = {
   albumId: number;
   albumLink: string;
   topGenre: string;
+  similarSongs?: Song[];
 };
-

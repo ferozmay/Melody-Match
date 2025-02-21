@@ -1,5 +1,5 @@
+import { Song } from "@/utils/types/song";
 import SongCard from "./cards/SongCard";
-import { Song } from "@/app/utils/types";
 
 interface SimilarSongsProps {
   similarSongs: Song[];

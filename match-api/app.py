@@ -35,6 +35,19 @@ index_thread.join()
 app_end_time = time.time()
 print("App loaded successfully! Time taken: ", app_end_time - app_start_time)
 
+@app.route("/api/songs/<track_id>")
+def get_song(track_id):
+    return track_ids_to_data(index.track_data, [int(track_id)])
+
+
+@app.route("/api/albums/<album_id>")
+def get_album(album_id):
+    return album_ids_to_data(index.album_data, [int(album_id)])
+
+@app.route("/api/artists/<artist_id>")
+def get_artist(artist_id):
+    return artist_ids_to_data(index.artist_data, [int(artist_id)])
+
 @app.route("/api/search")
 def handle_request():
     query = request.args.get("query", None)
@@ -60,8 +73,6 @@ def handle_request():
         track_data = track_ids_to_data(index.track_data, ranked_track_ids)
         album_data = album_ids_to_data(index.album_data, ranked_album_ids)
         artist_data = artist_ids_to_data(index.artist_data, ranked_artist_ids)
-        
-
         # to see some of the results and that the search is working uncomment this code
         # print("Track data results: ", '\n', track_data)
         # print("Track scores: ", '\n', sorted_track_scores)
@@ -69,8 +80,6 @@ def handle_request():
         # print("Album scores: ", '\n', sorted_album_scores)
         # print("Artist data results: ", '\n', artist_data)
         # print("Artist scores: ", '\n', sorted_artist_scores)
-
-
         return {'songs': json.loads(track_data), 'albums' : json.loads(album_data), 'artists': json.loads(artist_data)}
 
     return {}

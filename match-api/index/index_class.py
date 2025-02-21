@@ -1,4 +1,6 @@
 from index.store_load import load_data
+import numpy as np
+import json
 
 class Index:
     def load_index(self):
