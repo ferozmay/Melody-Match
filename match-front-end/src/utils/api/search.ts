@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { SEARCH_URL } from "./const";
+import { SearchResults } from "../types/searchResults";
+import useDebounce from "../hooks/debounce";
 
 // const placeholderResults = {
 //   songs: [
@@ -94,7 +96,7 @@ import { SEARCH_URL } from "./const";
 //       image:
 //         "https://freemusicarchive.org/image/?file=artist_image%2FLTz74ufAzu3es9s8VHdIAPZmcOzeguSWaCK0M5ei.png&width=290&height=290&type=artist",
 //       link: "/album/2",
-      
+
 //     },
 //     {
 //       id: 3,
@@ -110,12 +112,13 @@ import { SEARCH_URL } from "./const";
 // };
 
 const useApiSearch = () => {
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<SearchResults>({} as SearchResults);
   const [query, setQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const debouncedQuery = useDebounce(query, 500);
 
   useEffect(() => {
-    if (query) {
+    if (debouncedQuery) {
       setLoading(true);
       fetch(`${SEARCH_URL}?query=${encodeURIComponent(query)}`, {
         headers: {
@@ -141,7 +144,7 @@ const useApiSearch = () => {
       setLoading(false);
     }, 500);
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [debouncedQuery]);
 
   return {
     query,

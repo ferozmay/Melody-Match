@@ -1,14 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/components/input/SearchBar";
 import useApiSearch from "@/utils/api/search";
 import AllTab from "@/components/search/tabs/AllTab";
 import SongsTab from "@/components/search/tabs/SongsTab";
+import { SearchResults } from "@/utils/types/searchResults";
 
-const TabSelector = ({ activeTab, results }) => {
+const TabSelector = ({
+  activeTab,
+  results,
+}: {
+  activeTab: string;
+  results: SearchResults;
+}) => {
+  if (!("songs" in results)) return <></>;
   switch (activeTab) {
     case "All":
       return <AllTab results={results} />;
@@ -41,37 +48,48 @@ export default function SearchResultsPage() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    if (searchParams.get("q")) {
+      setQuery(searchParams.get("q") || "");
+    }
+  }, [searchParams]);
+
   return (
     <div className="flex flex-col items-center gap-8">
-      {/* Search form */}
-      <div className="w-full max-w-[600px]">
-        <SearchBar searchInput={query} setSearchInput={setQuery} />
-      </div>
       <div className="w-[80%] mx-auto text-white">
-        {/* Search settings */}
-        <div className="px-5 flex flex-col gap-2">
-          <h1 className="text-2xl font-bold">
-            Search results for: <span className="text-[#ffb74d]">{query}</span>
-          </h1>
-          {/*  */}
-          <div className="text-md flex w-full h-10 gap-3 flex-wrap">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => handleTabChange(tab)}
-                className={` py-1 px-4 border rounded ${
-                  activeTab == tab
-                    ? "bg-white text-black"
-                    : "bg-transparent text-white hover:bg-white/10"
-                } duration-150`}
-              >
-                {tab}
-              </button>
-            ))}
+        {/* search results bar */}
+        <div className="w-full flex justify-start gap-12">
+          {/* Search settings */}
+          <div className="px-5 flex flex-col gap-2">
+            <h1 className="text-2xl font-bold">
+              Search results for:{" "}
+              <span className="text-[#ffb74d]">{query}</span>
+            </h1>
+            {/*  */}
+            <div className="text-md flex w-full h-10 gap-3 flex-wrap">
+              {tabs.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => handleTabChange(tab)}
+                  className={` py-1 px-4 border rounded ${
+                    activeTab == tab
+                      ? "bg-white text-black"
+                      : "bg-transparent text-white hover:bg-white/10"
+                  } duration-150`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Search form input */}
+          <div className="w-full max-w-[600px]">
+            <SearchBar searchInput={query} setSearchInput={setQuery} />
           </div>
         </div>
+        {/* /search bar */}
         {/* Search results */}
-        <div className="w-full flex justify-center">
+        <div className="w-full flex justify-center py-8">
           {loading ? (
             <div className="h-48 flex items-center my-auto text-orange-400 text-3xl">
               Loading...
