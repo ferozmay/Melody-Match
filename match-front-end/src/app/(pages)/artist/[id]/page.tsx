@@ -28,7 +28,7 @@ const ArtistPage = () => {
         {/* Artist Image */}
         <div className="w-40 h-40 md:w-60 md:h-60 flex-shrink-0 mb-6 md:mb-0">
           <img
-            src={artist?.artistImage || "/default-artist.png"}
+            src={artist?.artistImage || "/images/placeholder.png"}
             alt="Artist Image"
             className="w-full h-full object-cover rounded-lg shadow-lg"
           />

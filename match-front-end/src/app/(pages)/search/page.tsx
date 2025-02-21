@@ -7,6 +7,8 @@ import useApiSearch from "@/utils/api/search";
 import AllTab from "@/components/search/tabs/AllTab";
 import SongsTab from "@/components/search/tabs/SongsTab";
 import { SearchResults } from "@/utils/types/searchResults";
+import ArtistsTab from "@/components/search/tabs/ArtistsTab";
+import AlbumsTab from "@/components/search/tabs/AlbumsTab";
 
 const TabSelector = ({
   activeTab,
@@ -21,6 +23,10 @@ const TabSelector = ({
       return <AllTab results={results} />;
     case "Songs":
       return <SongsTab results={results.songs} />;
+    case "Artists":
+      return <ArtistsTab results={results.artists} />;
+    case "Albums":
+      return <AlbumsTab results={results.albums} />;
     default:
       return <></>;
   }
@@ -39,7 +45,7 @@ export default function SearchResultsPage() {
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
-    router.push(`/search?tab=${tab}`);
+    router.push(`/search?q=${query}&tab=${tab}`);
   };
 
   useEffect(() => {
@@ -56,7 +62,7 @@ export default function SearchResultsPage() {
 
   useEffect(() => {
     if (query) {
-      router.push(`/search?q=${query}`);
+      router.push(`/search?q=${query}&tab=${activeTab}`);
     }
   }, [query]);
 
