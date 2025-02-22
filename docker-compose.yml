@@ -1,0 +1,15 @@
+version: "3.4"
+
+services:
+  backend:
+    image: match-backend
+    # env_file:
+    #   - .env.backend
+    build:
+      context: ./match-api
+      dockerfile: Dockerfile
+    command: gunicorn --timeout 300 --bind 0.0.0.0:5000 app:app
+    expose:
+      - 5000
+    ports:
+      - "5000:5000"
