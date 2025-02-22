@@ -15,7 +15,7 @@ app = Flask(__name__)
 # Set up CORS to prevent blockage of requests from local domains
 cors = CORS(
     app, 
-    resources={r"/api/*": {"origins": ["http://localhost:3000", "http://10.124.114.40:5173"]}}
+    resources={r"/api/*": {"origins": ["http://localhost:3000", "http://192.168.0.13:3000"]}}
 )
 
 

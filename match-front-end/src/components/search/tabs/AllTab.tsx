@@ -19,7 +19,7 @@ const AllTab = ({ results }: AllTabProps) => {
         (key) => (
           <div key={key} className="flex flex-col gap-3">
             <p className="text-4xl font-bold text-left capitalize">{key}</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4">
               {results[key] && results[key].length > 0 ? (
                 results[key].slice(0, 6).map((result, idx) => {
                   switch (key) {

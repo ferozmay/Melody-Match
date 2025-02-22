@@ -67,10 +67,10 @@ export default function SearchResultsPage() {
   }, [query]);
 
   return (
-    <div className="flex flex-col items-center gap-8">
-      <div className="w-[80%] mx-auto text-white">
+    <div className="flex flex-col items-center gap-4">
+      <div className="lg:w-[80%] mx-auto text-white">
         {/* search results bar */}
-        <div className="w-full flex justify-start gap-12">
+        <div className="w-full flex flex-col lg:flex-row justify-start gap-12">
           {/* Search settings */}
           <div className="px-5 flex flex-col gap-2">
             <h1 className="text-2xl font-bold">
@@ -101,7 +101,7 @@ export default function SearchResultsPage() {
         </div>
         {/* /search bar */}
         {/* Search results */}
-        <div className="w-full flex justify-center py-8">
+        <div className="w-full flex justify-center py-4 lg:py-8">
           {loading ? (
             <div className="h-48 flex items-center my-auto text-orange-400 text-3xl">
               Loading...
