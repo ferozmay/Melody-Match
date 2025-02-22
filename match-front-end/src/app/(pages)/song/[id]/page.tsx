@@ -6,10 +6,12 @@ import { Song } from "@/utils/types/song";
 import convertRuntime from "@/utils/song/runtime";
 import { useEffect, useState } from "react";
 import getSong from "@/utils/api/song";
+import useAudioPlayback from "@/utils/song/playback";
 
 const SongPage = () => {
   const { id } = useParams() as { id: string };
-  const [song, setSong] = useState<Song | null>(null);
+  const [song, setSong] = useState<Song>({} as Song);
+  const { audioUrl, isPlaying, togglePlaying } = useAudioPlayback(song);
 
   if (!id) {
     return (
@@ -70,11 +72,15 @@ const SongPage = () => {
           </p>
 
           {/* Play Button */}
-          <Link href={song?.link || "#"}>
-            <button className="py-2 px-6 bg-pink-600 hover:bg-pink-500 text-white rounded-full font-semibold transition duration-200">
-              Play Song
-            </button>
-          </Link>
+          <button
+            className="py-2 px-6 bg-pink-600 hover:bg-pink-500 text-white rounded-full font-semibold transition duration-200"
+            onClick={(e) => {
+              e.stopPropagation();
+              togglePlaying();
+            }}
+          >
+            {isPlaying ? "Pause" : "Play"}
+          </button>
         </div>
       </div>
       <div className="w-full mt-10 max-w-5xl mx-10  md:space-x-8">
