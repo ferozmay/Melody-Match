@@ -1,12 +1,12 @@
 "use client";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import SimilarSongs from "@/components/SimilarSongs";
 import { Song } from "@/utils/types/song";
 import convertRuntime from "@/utils/song/runtime";
 import { useEffect, useState } from "react";
 import getSong from "@/utils/api/song";
 import useAudioPlayback from "@/utils/song/playback";
+import SongsList from "@/components/common/SongsList";
 
 const SongPage = () => {
   const { id } = useParams() as { id: string };
@@ -26,8 +26,6 @@ const SongPage = () => {
       setSong(song);
     });
   }, [id]);
-
-  const similarSongs = [song] as Song[]; //results.songs.filter((s) => s.id !== songId); // Exclude the current song from the similar songs
 
   return (
     <div className="flex flex-col items-center gap-8">
@@ -83,9 +81,9 @@ const SongPage = () => {
           </button>
         </div>
       </div>
-      <div className="w-full mt-10 max-w-5xl mx-10  md:space-x-8">
+      <div className="w-full my-10 max-w-5xl mx-10  md:space-x-8">
         {/* Display similar songs */}
-        <SimilarSongs similarSongs={song?.similarSongs || []} />
+        <SongsList title="Similar Songs" songs={song?.similarSongs || []} />
       </div>
     </div>
   );

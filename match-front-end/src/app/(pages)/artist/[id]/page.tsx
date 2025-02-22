@@ -1,12 +1,52 @@
 "use client";
+import AlbumsList from "@/components/common/AlbumsList";
+import SongsList from "@/components/common/SongsList";
+import AlbumsTab from "@/components/search/tabs/AlbumsTab";
+import SongsTab from "@/components/search/tabs/SongsTab";
 import getArtist from "@/utils/api/artist";
+import { Album } from "@/utils/types/album";
 import { Artist } from "@/utils/types/artist";
-import { useParams } from "next/navigation";
+import { Song } from "@/utils/types/song";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+
+type ArtistTabData = {
+  songs: Song[];
+  albums: Album[];
+};
+
+const TabSelector = ({
+  activeTab,
+  data,
+}: {
+  activeTab: string;
+  data: ArtistTabData;
+}) => {
+  if (!("songs" in data)) return <></>;
+  switch (activeTab) {
+    case "Songs":
+      return <SongsTab results={data.songs} />;
+    case "Albums":
+      return <AlbumsTab results={data.albums} />;
+    default:
+      return <></>;
+  }
+};
 
 const ArtistPage = () => {
   const { id } = useParams() as { id: string };
   const [artist, setArtist] = useState<Artist | null>(null);
+  //
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const selectedTab = searchParams.get("tab") || "Songs";
+  const tabs = ["Songs", "Albums"];
+  const [activeTab, setActiveTab] = useState<string>(selectedTab);
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    router.push(`/artist/${artist?.id}?tab=${tab}`);
+  };
 
   if (!id) {
     return (
@@ -43,6 +83,27 @@ const ArtistPage = () => {
             {artist?.bio || "Artist bio is not available."}
           </p>
         </div>
+      </div>
+      <div className="w-full my-5 max-w-5xl flex flex-col gap-4">
+        <div className="text-md flex w-full h-10 gap-3 flex-wrap">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => handleTabChange(tab)}
+              className={` py-1 px-4 border rounded ${
+                activeTab == tab
+                  ? "bg-white text-black"
+                  : "bg-transparent text-white hover:bg-white/10"
+              } duration-150`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+        <TabSelector
+          activeTab={activeTab}
+          data={{ albums: artist?.albums || [], songs: artist?.songs || [] }}
+        />
       </div>
     </div>
   );

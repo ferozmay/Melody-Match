@@ -37,16 +37,16 @@ print("App loaded successfully! Time taken: ", app_end_time - app_start_time)
 
 @app.route("/api/songs/<track_id>")
 def get_song(track_id):
-    return track_ids_to_data(index.track_data, [int(track_id)])
+    return index.track_ids_to_data(int(track_id), include_similar=True)
 
 
 @app.route("/api/albums/<album_id>")
 def get_album(album_id):
-    return album_ids_to_data(index.album_data, [int(album_id)])
+    return index.album_ids_to_data(int(album_id), include_tracks=True)
 
 @app.route("/api/artists/<artist_id>")
 def get_artist(artist_id):
-    return artist_ids_to_data(index.artist_data, [int(artist_id)])
+    return index.artist_ids_to_data(int(artist_id), include_albums=True, include_tracks=True)
 
 @app.route("/api/search")
 def handle_request():
@@ -70,9 +70,9 @@ def handle_request():
         ranked_track_ids = [track_id for track_id, _ in sorted_track_scores][:limit] 
         ranked_album_ids = [album_id for album_id, _ in sorted_album_scores][:limit]
         ranked_artist_ids = [artist_id for artist_id, _ in sorted_artist_scores][:limit]
-        track_data = track_ids_to_data(index.track_data, ranked_track_ids)
-        album_data = album_ids_to_data(index.album_data, ranked_album_ids)
-        artist_data = artist_ids_to_data(index.artist_data, ranked_artist_ids)
+        track_data = index.track_ids_to_data(ranked_track_ids)
+        album_data = index.album_ids_to_data(ranked_album_ids)
+        artist_data = index.artist_ids_to_data(ranked_artist_ids)
         # to see some of the results and that the search is working uncomment this code
         # print("Track data results: ", '\n', track_data)
         # print("Track scores: ", '\n', sorted_track_scores)
