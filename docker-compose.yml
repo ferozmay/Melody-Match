@@ -13,6 +13,7 @@ services:
       - "5000:5000"
   nginx:
     image: nginx:1.24.0-alpine
+    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
     ports:
       - "80:80"
       - "443:443"
