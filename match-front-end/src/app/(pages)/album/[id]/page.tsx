@@ -10,6 +10,12 @@ const AlbumPage = () => {
   const { id } = useParams() as { id: string };
   const [album, setAlbum] = useState<Album | null>(null);
 
+  useEffect(() => {
+    getAlbum(id).then((album: Album) => {
+      setAlbum(album);
+    });
+  }, [id]);
+
   if (!id) {
     return (
       <div className="text-red-400 p-4 text-center">
@@ -17,12 +23,6 @@ const AlbumPage = () => {
       </div>
     );
   }
-
-  useEffect(() => {
-    getAlbum(id).then((album: Album) => {
-      setAlbum(album);
-    });
-  }, [id]);
 
   return (
     <div className="flex flex-col items-center gap-8">

@@ -1,6 +1,4 @@
 "use client";
-import AlbumsList from "@/components/common/AlbumsList";
-import SongsList from "@/components/common/SongsList";
 import AlbumsTab from "@/components/search/tabs/AlbumsTab";
 import SongsTab from "@/components/search/tabs/SongsTab";
 import getArtist from "@/utils/api/artist";
@@ -8,7 +6,7 @@ import { Album } from "@/utils/types/album";
 import { Artist } from "@/utils/types/artist";
 import { Song } from "@/utils/types/song";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 type ArtistTabData = {
   songs: Song[];
@@ -33,7 +31,7 @@ const TabSelector = ({
   }
 };
 
-const ArtistPage = () => {
+const ArtistPageComponent = () => {
   const { id } = useParams() as { id: string };
   const [artist, setArtist] = useState<Artist | null>(null);
   //
@@ -48,6 +46,12 @@ const ArtistPage = () => {
     router.push(`/artist/${artist?.id}?tab=${tab}`);
   };
 
+  useEffect(() => {
+    getArtist(id).then((artist) => {
+      setArtist(artist);
+    });
+  }, [id]);
+
   if (!id) {
     return (
       <div className="text-red-400 p-4 text-center">
@@ -55,12 +59,6 @@ const ArtistPage = () => {
       </div>
     );
   }
-
-  useEffect(() => {
-    getArtist(id).then((artist) => {
-      setArtist(artist);
-    });
-  }, [id]);
 
   return (
     <div className="flex flex-col items-center gap-8">
@@ -106,6 +104,14 @@ const ArtistPage = () => {
         />
       </div>
     </div>
+  );
+};
+
+const ArtistPage = () => {
+  return (
+    <Suspense>
+      <ArtistPageComponent />
+    </Suspense>
   );
 };
 

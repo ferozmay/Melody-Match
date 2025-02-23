@@ -2,7 +2,6 @@
 import { Song } from "@/utils/types/song";
 import Link from "next/link";
 import convertRuntime from "@/utils/song/runtime";
-import { useState } from "react";
 import useAudioPlayback from "@/utils/song/playback";
 import { FaPlay, FaPause } from "react-icons/fa6";
 
@@ -14,7 +13,7 @@ const SongCard = ({
   inline?: boolean;
 }) => {
   const runtime = convertRuntime(Number(song.runtime));
-  const { audioUrl, isPlaying, togglePlaying } = useAudioPlayback(song);
+  const { isPlaying, togglePlaying } = useAudioPlayback(song);
 
   // inline card
   if (true) {
@@ -86,6 +85,7 @@ const SongCard = ({
       </Link>
     );
   }
+  if (inline) return;
   // full length card
   // return (
   //   <Link href={`/song/${song.id}`} key={song.id}>

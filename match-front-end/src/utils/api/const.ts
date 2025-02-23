@@ -1,4 +1,4 @@
-export const BACKEND_URL = "http://192.168.0.13:5000";
+export const BACKEND_URL = "http://34.142.120.221";
 export const API_URL = `${BACKEND_URL}/api`;
 
 export const SEARCH_URL = `${API_URL}/search`;

@@ -11,7 +11,13 @@ import SongsList from "@/components/common/SongsList";
 const SongPage = () => {
   const { id } = useParams() as { id: string };
   const [song, setSong] = useState<Song>({} as Song);
-  const { audioUrl, isPlaying, togglePlaying } = useAudioPlayback(song);
+  const { isPlaying, togglePlaying } = useAudioPlayback(song);
+
+  useEffect(() => {
+    getSong(id).then((song) => {
+      setSong(song);
+    });
+  }, [id]);
 
   if (!id) {
     return (
@@ -20,12 +26,6 @@ const SongPage = () => {
       </div>
     );
   }
-
-  useEffect(() => {
-    getSong(id).then((song) => {
-      setSong(song);
-    });
-  }, [id]);
 
   return (
     <div className="flex flex-col items-center gap-8">

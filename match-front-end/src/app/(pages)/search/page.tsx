@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/components/input/SearchBar";
 import useApiSearch from "@/utils/api/search";
@@ -32,7 +32,7 @@ const TabSelector = ({
   }
 };
 
-export default function SearchResultsPage() {
+const SearchResultsComponent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   //   const searchQuery = searchParams.get("q") || "";
@@ -113,5 +113,13 @@ export default function SearchResultsPage() {
         </div>
       </div>
     </div>
+  );
+};
+
+export default function SearchResultsPage() {
+  return (
+    <Suspense>
+      <SearchResultsComponent />
+    </Suspense>
   );
 }

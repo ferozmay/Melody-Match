@@ -1,7 +1,4 @@
 import Link from "next/link";
-import type { Metadata } from "next";
-import Head from "next/head";
-import { Inter } from "next/font/google";
 
 export default function Layout({
   children,
