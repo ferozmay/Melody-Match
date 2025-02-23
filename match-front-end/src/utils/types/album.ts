@@ -4,8 +4,9 @@ export type Album = {
   id: number;
   title: string;
   artist: string;
-  image: string;
+  albumCover: string;
   link: string;
   artistLink: string;
   songs: Song[];
+  releaseDate: string;
 };

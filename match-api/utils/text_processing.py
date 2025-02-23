@@ -10,7 +10,7 @@ non_alphanum = r"[^a-zA-Z0-9_-]"
 stemmer = PorterStemmer()
 stemmer = Stemmer.Stemmer("english")
 # load stopwords
-with open("./data/stopwords.txt", "r") as stopwords_file:
+with open("./utils/stopwords.txt", "r") as stopwords_file:
     stopwords = set(stopwords_file.read().strip().split("\n"))
 
 

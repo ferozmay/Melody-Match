@@ -9,9 +9,10 @@ interface SearchBarProps {
 const SearchBar = ({ searchInput, setSearchInput }: SearchBarProps) => {
   return (
     <form
-      className="w-full max-w-2xl bg-white bg-opacity-20 backdrop-blur-md rounded-lg shadow-lg p-2 transition duration-300 hover:shadow-2xl focus-within:shadow-2xl flex items-center gap-2"
+      className="w-full max-w-2xl bg-white text-white bg-opacity-20 backdrop-blur-md rounded-lg shadow-lg p-2 transition duration-300 hover:shadow-2xl focus-within:shadow-2xl flex items-center gap-2"
       role="search"
       aria-label="Search"
+      onSubmit={(e) => e.preventDefault()}
       //   onSubmit={handleSubmit}
     >
       <input
@@ -24,11 +25,11 @@ const SearchBar = ({ searchInput, setSearchInput }: SearchBarProps) => {
         title="Search"
       />
       <button
-        className="w-12 h-12 flex items-center justify-center bg-transparent rounded-lg hover:bg-white/10 transition cursor-pointer"
+        className="w-12 h-12 flex text-white items-center justify-center transition cursor-pointer"
         type="submit"
         aria-label="Submit"
       >
-        <FaMagnifyingGlass className="text-xl drop-shadow-md transition-all hover:drop-shadow-lg" />
+        <FaMagnifyingGlass className="text-white text-xl transition-all" />
       </button>
     </form>
   );

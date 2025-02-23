@@ -22,6 +22,7 @@ body {
     font-family: "JetBrains Mono", sans-serif;
 }
 
+
 @layer utilities {
     .animate-gradient {
         background: linear-gradient(

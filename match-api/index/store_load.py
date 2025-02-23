@@ -5,15 +5,20 @@ from index.data_processing import process_data
 from index.inverted_index import create_inverted_index
 
 """This module serves two purpouses:
-1. When executed it makes all the data frames we will be using and builds the inverted index. It does this by executing functions imported from 
-data_cleaning.py, data_processing.py and inverted_index.py. It then stores the data frames and the inverted index as binary in the data/stored_data folder.
-2. It also contains the function load_data() which loads the data frames and the inverted index from the data/stored_data folder. This function is
-used to efficiently load the stored data when the app is started from file. This loading is done in the index class."""
+1. Loads, preprocesses dataframes, builds inverted index. Saves dfs and the inverted index as binary in the data/stored_data folder.
+
+2. defines load_data(), loads the dfs and the inverted index from data/stored_data folder. 
+Used to efficiently load the stored data 
+This loading is done in the index class."""
 
 def store_data():
-    """Executes the function compositions from the data_cleaning and inverted_index modules: namely it executes in sequence clean_and_make_data(),
-    process_data() and create_inverted_index(). It then stores the data frames and the inverted index as binary. For most efficient storage the 
-    function stores the data frames in a single hdf5 file where each data frame is associated with a key and the inverted index is pickled."""
+    """
+    1. clean_and_make_data(),
+    2. process_data()
+    3. create_inverted_index(). 
+    Save dfs and the inverted index as binary. 
+    For efficient storage stores the dfs in a single hdf5 file
+    Each df is associated with a key and the inverted index is pickled."""
 
     # clean and make data
     track_data, album_data, artist_data, genres_data = clean_and_make_data()
@@ -43,7 +48,7 @@ def store_data():
         pickle.dump(inverted_index, f)
 
 def load_data():
-    """Loads the data frames and the inverted index from the data/stored_data folder. We only load the necessary ones."""
+    """Loads the data frames and the inverted index. We only load the necessary ones."""
 
     # we are now loading teh tracks, artists, albums dfs and the doclengths dfs for ranking
     track_data = pd.read_hdf('data/stored_data/dataframes.h5', key='track_data_df')
