@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Song } from "../types/song";
+import { AUDIO_URL } from "../api/const";
 
 const useAudioPlayback = (song: Song | null) => {
   const [audioUrl, setAudioUrl] = useState<string>("");
@@ -19,9 +20,9 @@ const useAudioPlayback = (song: Song | null) => {
         .toString()
         .padStart(3, "0");
       const audioPath = song.id.toString().padStart(6, "0");
-      setAudioUrl(`http://35.197.212.29/audio/${audioFolder}/${audioPath}.mp3`);
+      setAudioUrl(`${AUDIO_URL}/${audioFolder}/${audioPath}.mp3`);
       const newAudio = new Audio();
-      newAudio.src = `http://35.197.212.29/audio/${audioFolder}/${audioPath}.mp3`;
+      newAudio.src = `${AUDIO_URL}/${audioFolder}/${audioPath}.mp3`;
       newAudio.load();
       setAudio(newAudio);
     } else {

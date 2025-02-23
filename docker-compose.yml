@@ -12,8 +12,11 @@ services:
     ports:
       - "5000:5000"
   frontend:
-    image: pelish/match-frontend:latest
+    # image: pelish/match-frontend:latest
+    image: match-frontend
     command: npm run start
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=http://34.142.120.221
     expose:
       - 3000
     ports:
