@@ -33,4 +33,21 @@ wget http://labrosa.ee.columbia.edu/~dpwe/tmp/millionsongsubset.tar.gz
 
 # Download only metadata from MSD
 wget http://millionsongdataset.com/sites/default/files/AdditionalFiles/msd_summary_file.h5
+
+# Download low-level features from MSD
+wget https://www.ifs.tuwien.ac.at/mir/msd/downloads/msd-jmir-spectral-all-all-v1.0.arff.gz
+gunzip msd-jmir-spectral-all-all-v1.0.arff.gz
+wget https://www.ifs.tuwien.ac.at/mir/msd/downloads/msd-jmir-mfcc-all-v1.0.arff.gz
+gunzip msd-jmir-mfcc-all-v1.0.arff.gz
+wget https://www.ifs.tuwien.ac.at/mir/msd/downloads/msd-jmir-spectral-all-derivatives-all-v1.0.arff.gz
+gunzip msd-jmir-spectral-all-derivatives-all-v1.0.arff.gz
+# Get timbral features
+wget https://www.ifs.tuwien.ac.at/mir/msd/downloads/msd-marsyas-timbral-v1.0.arff.gz
+gunzip msd-marsyas-timbral-v1.0.arff.gz
+
+# Get genres
+wget https://www.tagtraum.com/genres/msd_tagtraum_cd1.cls.zip
+unzip msd_tagtraum_cd1.cls.zip
+rm msd_tagtraum_cd1.cls.zip
+
 ```

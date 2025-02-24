@@ -50,8 +50,6 @@ match-api/inverted-index.json
 match-api/utils/__pycache__/
 match-api/index/__pycache__/
 match-api/__pycache__/
-match-api/inverted-index.json
-node_modules/
 node_modules/
 
 # Similarity data
