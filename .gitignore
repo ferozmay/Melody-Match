@@ -55,7 +55,9 @@ node_modules/
 # Similarity data
 similarity_research/data/FMA
 similarity_research/data/MSD
+similarity_research/data/temp
 similarity_research/models/FMA_similarity_dict.json
+similarity_research/models/
 *.mp3
 
 # virtual environments
