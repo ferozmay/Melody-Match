@@ -184,7 +184,8 @@ def fix_album_cover_url(data_df, track_or_album_id, album=False):
         album_info = data_df.loc[track_or_album_id]
         album_cover_path = album_info[("album_image_file")]
 
-    placeholder = "https://community.mp3tag.de/uploads/default/original/2X/a/acf3edeb055e7b77114f9e393d1edeeda37e50c9.png"
+    # placeholder = "https://community.mp3tag.de/uploads/default/original/2X/a/acf3edeb055e7b77114f9e393d1edeeda37e50c9.png"
+    placeholder = None
 
     
     if isinstance(album_cover_path, float) and np.isnan(album_cover_path):
@@ -205,7 +206,8 @@ def fix_artist_image_url(data_df, artist_id):
     artist_info =  data_df.loc[artist_id]
     artist_image_path = artist_info[("artist_image_file")]
 
-    placeholder = 'https://vevmo.com/sites/default/files/upload/woman-question-mark_0.jpg'
+    placeholder = None
+    # 'https://vevmo.com/sites/default/files/upload/woman-question-mark_0.jpg'
 
     if isinstance(artist_image_path, float) and np.isnan(artist_image_path):
         return placeholder

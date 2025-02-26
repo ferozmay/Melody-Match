@@ -3,6 +3,12 @@ import numpy as np
 import json
 
 
+similar_songs_dict = {}
+
+with open("data/stored_data/fma_sim_dict.json", "r") as f:
+    similar_songs_dict = json.load(f)
+
+
 def handle_nan(value):
     # if the value is NaN replace it with None (for valid JSON)
     if isinstance(value, float) and (value != value): 
@@ -13,6 +19,11 @@ def handle_nan(value):
 class Index:
     def load_index(self):
         self.track_data, self.album_data, self.artist_data, self.doclengths_track_data, self.doclengths_album_data, self.doclengths_artist_data, self.index = load_data()
+    
+    def get_similar_songs(self, song_id):
+        scored_songs = similar_songs_dict.get(str(song_id), [])
+        similar_song_ids = [int(song[0]) for song in scored_songs]
+        return similar_song_ids
 
     def track_ids_to_data(self, track_ids, include_similar=False):
         track_data = self.track_data
@@ -25,7 +36,7 @@ class Index:
             track_info = track_data.loc[track_id]
             similar_songs = []
             if include_similar:
-                similar_songs = json.loads(self.track_ids_to_data(track_data.iloc[:10].index.tolist()))
+                similar_songs = json.loads(self.track_ids_to_data(self.get_similar_songs(track_id)))
             
             data.append({
                 "id": track_id,
