@@ -75,6 +75,7 @@ def create_track_data_multiindex(df):
         'album_url': ('track', 'track_image_file')
     }
 
+    # set index to match the track_data dat frame from fma
     df.set_index('track_id', inplace =True)
     
     # Create new column names using the mapping; if a column is not found in the mapping,
@@ -140,13 +141,12 @@ def create_album_data(df):
         album_tracks=('track_id', 'count'),       # Count the number of tracks
         track_ids=('track_id', list),             # List the track_ids
         artist_name = ('artist_name', 'first'),
-        album_date_released = ('track_year', 'first')
+        album_date_released = ('track_year', 'first'),
+        tags = ('track_tags', list)
     )
 
-    # After your groupby operation, reset the index to make 'album_release_7digitalid' a column
+    # reset index to a new index and get the album_id as a column again
     album_df = album_df.reset_index()
-    album_df.set_index('album_id', inplace=True)
-    album_df.index.name = 'album_id'
 
     base_url = "https://open.spotify.com/search/"
     album_df['album_url'] = base_url + album_df['album_title']
@@ -183,16 +183,14 @@ def create_artist_data(df):
         # List of track_ids for the artist
         track_ids=('track_id', list),
         album_ids=('album_id', lambda x: list(
-            x.unique()))  # Unique album IDs
+            x.unique())) , # Unique album IDs
+        tags = ('track_tags', list)
     )
+
+    artist_df['artist_image_file'] = np.nan
 
     # After the groupby operation, reset the index to make 'artist_id' a column
     artist_df = artist_df.reset_index()
-
-    
-
-    # Optionally, set the DataFrame's index name (here we simply keep the default integer index)
-    artist_df.set_index('artist_id', inplace=True)
 
     base_url = "https://open.spotify.com/search/"
     artist_df['artist_url'] = base_url + artist_df['artist_name']

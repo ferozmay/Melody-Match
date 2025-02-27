@@ -47,20 +47,22 @@ def clean_track_data():
     # convert genres which are actually strings of the form '[12, 34]' to what they should be which is lists of the form
     # [12, 34] - there are definitely many columns we need to do this to , this is just the only one used so far 
     track_data[('track', 'genres')] = track_data[('track', 'genres')].apply(ast.literal_eval)
+    
     # Find common columns
     common_columns = track_data.columns.intersection(msd_data.columns)
-
+    msd_extra_columns = [('track', 'similars')]
     # Print common columns
     print("Common columns:", common_columns.tolist())
+    print("Extra Columns:" , msd_extra_columns)
 
-    print('\n', track_data.columns, '\n', msd_data.columns)
+    # print('\n', list(set(track_data.columns)-set(common_columns)), '\n', list(set(msd_data.columns)-set(common_columns)))
 
+    track_data = track_data[common_columns]
+    msd_data = msd_data[list(common_columns) + msd_extra_columns]
     track_data = pd.concat([track_data, msd_data], axis=0, ignore_index=False)
     print(track_data.head())
     print(track_data.tail())
-    print(track_data[common_columns].head())
-    print(track_data[common_columns].tail())
-    
+
     return track_data
 
 
@@ -113,10 +115,20 @@ def make_album_data(track_data):
     msd_track_data = pd.read_csv('data/msd_metadata/msd.csv')
     msd_track_data = create_track_data_multiindex(msd_track_data)
     msd_album_data = create_album_data(msd_track_data)
-
     fma_max_album_id = album_data['album_id'].max()
-    msd_album_data.index += fma_max_album_id + 1
+    msd_album_data['album_id'] += fma_max_album_id + 2
+    print(msd_album_data['album_id'].min(), msd_album_data['album_id'].max())
+    # Find common columns
+    common_columns = album_data.columns.intersection(msd_album_data.columns)
 
+    print("max album id", fma_max_album_id)
+    # Print common columns
+    print("Common columns:", common_columns.tolist())
+
+    print('\n', album_data.columns, '\n', msd_album_data.columns)
+
+    album_data = album_data[common_columns]
+    msd_album_data = msd_album_data[common_columns]
     album_data = pd.concat([album_data, msd_album_data], axis=0, ignore_index=False)
 
     # fix image urls
@@ -124,7 +136,7 @@ def make_album_data(track_data):
 
     # make a copy of the track data we care about
     # I haven't used the genres_all and genre_top columns but they may be useful to add into the album data
-    temp_track_data = track_data[[('album', 'title'), ('track', 'title'), ('track', 'genres'), ('track', 'genres_all'), ('track', 'genre_top')]].copy()
+    temp_track_data = track_data[[('album', 'title'), ('track', 'title'), ('track', 'genres')]].copy()
 
     # group the track data by albums, and gather the songs on each album and the genres of each song
     track_ids = temp_track_data.groupby(('album', 'title')).apply(lambda x: list(x.index), include_groups = False).reset_index(name=('track', 'ids'))
@@ -152,17 +164,9 @@ def make_album_data(track_data):
     album_data.set_index('album_id', inplace=True)
 
     
-    # Find common columns
-    common_columns = album_data.columns.intersection(msd_album_data.columns)
-
-    # Print common columns
-    print("Common columns:", common_columns.tolist())
-
-    print('\n', album_data.columns, '\n', msd_album_data.columns)
     print(album_data.head())
     print(album_data.tail())
-    print(album_data[common_columns].head())
-    print(album_data[common_columns].tail())
+        
     return album_data
 
 
@@ -177,10 +181,21 @@ def make_artist_data(track_data):
     msd_track_data = create_track_data_multiindex(msd_track_data)
     msd_artist_data = create_artist_data(msd_track_data)
 
+    # Find common columns
+    common_columns = artist_data.columns.intersection(msd_artist_data.columns)
+    
+    # Print common columns
+    print("Common columns:", common_columns.tolist())
+    
+    print('\n', artist_data.columns, '\n', msd_artist_data.columns)
+
+    artist_data = artist_data[common_columns]
+    msd_artist_data = msd_artist_data[common_columns]
+
     artist_data = pd.concat([artist_data, msd_artist_data], axis=0, ignore_index=False)
 
     # make a copy of the track data we care about
-    temp_track_data = track_data[[('artist', 'name'), ('track', 'title'), ('track', 'genres'), ('track', 'genres_all'), ('track', 'genre_top'), ('album', 'id')]].copy()
+    temp_track_data = track_data[[('artist', 'name'), ('track', 'title'), ('track', 'genres'), ('album', 'id')]].copy()
 
     # group the track data by artist, and gather the songs by each artist and the genres of each song
     track_ids = temp_track_data.groupby(('artist', 'name')).apply(lambda x: list(x.index), include_groups = False).reset_index(name=('track', 'ids'))
@@ -212,20 +227,9 @@ def make_artist_data(track_data):
     # fix image urls
     artist_data[("artist_image_file")] = artist_data.index.map(lambda x: fix_artist_image_url(artist_data, x))
 
-    # Find common columns
-    common_columns = artist_data.columns.intersection(msd_artist_data.columns)
-    
-    # Print common columns
-    print("Common columns:", common_columns.tolist())
-
-    print('\n', artist_data.columns, '\n', msd_artist_data.columns)
     print(artist_data.head())
     print(artist_data.tail())
     
-    print(artist_data[common_columns].head())
-    print(artist_data[common_columns].tail())
-
-
     return artist_data
 
 
@@ -245,6 +249,9 @@ def fix_album_cover_url(data_df, track_or_album_id, album=False):
     if isinstance(album_cover_path, float) and np.isnan(album_cover_path):
         return placeholder
 
+    if album_cover_path is None:
+        return placeholder
+    
     if 'albums' in album_cover_path:
         actual_url = album_cover_path.replace("file/images/albums/", "image/?file=images%2Falbums%2F")
         actual_url = actual_url + "&width=290&height=290&type=album"
@@ -263,6 +270,9 @@ def fix_artist_image_url(data_df, artist_id):
     placeholder = 'https://vevmo.com/sites/default/files/upload/woman-question-mark_0.jpg'
 
     if isinstance(artist_image_path, float) and np.isnan(artist_image_path):
+        return placeholder
+
+    if artist_image_path is None:
         return placeholder
 
     if 'artists' in artist_image_path:

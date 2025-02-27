@@ -23,13 +23,18 @@ def store_data():
     # clean and make data
     track_data, album_data, artist_data, genres_data = clean_and_make_data()
 
-    # # bundle dfs together
-    # entire_dfs = (track_data, album_data, artist_data, genres_data)
-    # # preprocess dfs
-    # pp_track_data, pp_album_data, pp_artist_data, doclengths_track_data, doclengths_album_data, doclengths_artist_data = process_data(entire_dfs)
-    # # bundle preprocessed dfs together
-    # entire_pp_dfs = (pp_track_data, pp_album_data, pp_artist_data)
-    # entire_doclengths_dfs = (doclengths_track_data, doclengths_album_data, doclengths_artist_data)
+    # bundle dfs together
+    entire_dfs = (track_data, album_data, artist_data, genres_data)
+    # preprocess dfs
+    pp_track_data, pp_album_data, pp_artist_data, doclengths_track_data, doclengths_album_data, doclengths_artist_data = process_data(entire_dfs)
+    # bundle preprocessed dfs together
+    entire_pp_dfs = (pp_track_data, pp_album_data, pp_artist_data)
+    print('pp_dfs loaded')
+    print(pp_track_data.head())
+    print(pp_track_data.tail())
+    print(pp_artist_data.head())
+    print(pp_artist_data.tail())
+    entire_doclengths_dfs = (doclengths_track_data, doclengths_album_data, doclengths_artist_data)
     # # # create inverted index
     # inverted_index = create_inverted_index(entire_pp_dfs)
     # # create lists of keys for each data frame we will store
