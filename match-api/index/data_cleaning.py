@@ -64,10 +64,24 @@ def clean_genres_data():
 
 
 def make_album_data(track_data):
-    """This function loads the raw_albums.csv file into a df. It also takes as input the tracks df from the clean_track_data function. The album image url is fixed.
-    This function aims to add to the information contained in the albums df by extracting information from the tracks df. In the tracks df we assicated each track id (that is on an album) with an album 
-    and with a list of genres. In the albums df we want to associate each album with the list of tracks that compose it and the list of genres that best describe it. We achieve this by grouping a copy of the 
-    tracks df by album ids (the tracks df is filtered to only include specific columns). When we do this grouping we aggregate the track ids (the indices of the tracks df) and the genre ids assocaited with each album id.
+    """
+    Loads raw_albums.csv as df.
+    Takes in tracks_df from the clean_track_data()
+    The album image url is fixed.
+    
+    Add information to albums_df from tracks_df.
+    In the tracks_df, each track_id (that is on an album) with an album, and with a list of genres. 
+    
+    Goal: album_df should have a list of track_ids and a list of genres for each album.
+    
+    We achieve this by grouping a copy of the 
+    1. Group track_df by album_id and gather the track_ids for each album.
+    2. Group track_df by album_id and gather the genres for each album.
+    3. Merge the two grouped dataframes.
+    4. Merge the merged dataframe with the albums_df.
+    5. Create a dictionary for each album key
+    
+    When we do this grouping we aggregate the track ids (the indices of the tracks df) and the genre ids assocaited with each album id.
     We then flatten the index of these grouped dfs, merge them and then merge them with the albums df. 
     When we aggregate the genres over all tracks, we ensure that we don't use a set, so that we can keep track of the frequency that a genre occurs on the album (ie the number of tracks on the album classified as that genre).
     We then create a dictionary for each album. This dictionary uses as keys genre ids and as a value the corresponding frequency that genre occured in the total count of genres of tracks. We also keep track of the number of genres

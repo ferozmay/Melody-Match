@@ -68,5 +68,4 @@ lyrics_search/data
 venv/
 .venv/
 .DS_Store
-
-
+node_modules/

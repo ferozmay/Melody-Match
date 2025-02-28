@@ -1,5 +1,5 @@
-import { Song } from "@/app/utils/types";
 import SongCard from "@/components/cards/SongCard";
+import { Song } from "@/utils/types/song";
 import React from "react";
 
 interface SongsTabProps {
@@ -8,7 +8,7 @@ interface SongsTabProps {
 
 const SongsTab = ({ results }: SongsTabProps) => {
   return (
-    <div>
+    <div className="w-full grid grid-cols-1 gap-4">
       {results.map((song) => (
         <SongCard key={song.id} song={song} />
       ))}
