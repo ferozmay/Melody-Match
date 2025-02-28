@@ -14,7 +14,9 @@ const SongPage = () => {
   const { isPlaying, togglePlaying } = useAudioPlayback(song);
 
   useEffect(() => {
+    console.log("Fetching song for ID:", id);
     getSong(id).then((song) => {
+      console.log("Fetched Song Data:", song); 
       setSong(song);
     });
   }, [id]);

@@ -38,6 +38,8 @@ class Index:
                 "album": handle_nan(track_info[("album", "title")]),
                 "albumLink": handle_nan(track_info[("track", "album_url")]),
                 "topGenre": handle_nan(track_info[("track", "genre_top")]),
+                "albumId": handle_nan(track_info[("album", "id")]),
+                "artistId": handle_nan(track_info[("artist", "id")]),
                 "similarSongs": similar_songs
             })
         
@@ -95,7 +97,8 @@ class Index:
                 "artistImage" : handle_nan(artist_info[("artist_image_file")]),
                 "link": handle_nan(artist_info[("artist_url")]),
                 "songs": songs,
-                "albums": albums
+                "albums": albums,
+                "bio": handle_nan(artist_info[("artist_bio")])
             })
         if single:
             return json.dumps(data[0], default=str)

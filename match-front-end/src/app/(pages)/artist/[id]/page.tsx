@@ -77,8 +77,7 @@ const ArtistPageComponent = () => {
           <h1 className="text-6xl font-extrabold text-orange-400 text-left mb-4">
             {artist?.name}
           </h1>
-          <p className="text-lg text-gray-400 text-left">
-            {artist?.bio || "Artist bio is not available."}
+          <p className="text-lg text-gray-400 text-left" dangerouslySetInnerHTML={{__html: artist?.bio || "Artist bio is not available."}}>
           </p>
         </div>
       </div>

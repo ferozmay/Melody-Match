@@ -39,7 +39,6 @@ print("App loaded successfully! Time taken: ", app_end_time - app_start_time)
 def get_song(track_id):
     return index.track_ids_to_data(int(track_id), include_similar=True)
 
-
 @app.route("/api/albums/<album_id>")
 def get_album(album_id):
     return index.album_ids_to_data(int(album_id), include_tracks=True)
@@ -66,7 +65,7 @@ def handle_request():
         sorted_album_scores = sorted(album_scores.items(), key=lambda item: sum(item[1]), reverse=True)
         sorted_artist_scores = sorted(artist_scores.items(), key=lambda item: sum(item[1]), reverse=True)
         
-        
+
         ranked_track_ids = [track_id for track_id, _ in sorted_track_scores][:limit] 
         ranked_album_ids = [album_id for album_id, _ in sorted_album_scores][:limit]
         ranked_artist_ids = [artist_id for artist_id, _ in sorted_artist_scores][:limit]
