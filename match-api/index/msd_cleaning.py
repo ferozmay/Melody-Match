@@ -78,6 +78,7 @@ def create_track_data_multiindex(df):
     # set index to match the track_data dat frame from fma
     df.set_index('track_id', inplace =True)
     
+    
     # Create new column names using the mapping; if a column is not found in the mapping,
     # default it to the 'track' group.
     new_columns = []
@@ -93,31 +94,98 @@ def create_track_data_multiindex(df):
     df_genres = pd.read_csv("data/fma_metadata/genres.csv")
 
     genre_mapping = dict(
-        zip(df_genres['title'].str.strip(), df_genres['genre_id']))
+        zip(df_genres['title'].str.strip().str.lower(), df_genres['genre_id']))
+
+    
+    # Convert (track, tags) column to list of top 10 tags
+    def process_tags(tags, genres):
+   
+        new_tags = tags
+        new_genres = genres
+        
+        if pd.isna(tags):
+            new_tags = []
+
+        if pd.isna(genres):
+            new_genres = ""
+        
+        if not new_tags:
+            return new_tags, new_genres
+        
+        tags_dict = eval(tags)
+        sorted_tags = sorted(tags_dict.items(), key=lambda item: int(item[1]), reverse=True)
+        top_10_tags = [tag.lower() for tag, _ in sorted_tags[:10]]
+
+        new_tags = []
+    
+        for tag in top_10_tags:
+            if tag in genre_mapping:
+                new_genres = ', '.join(filter(None, [new_genres, tag]))
+            else:
+                new_tags.append(tag)
+
+        return new_tags, new_genres
+    
+    for index, row in df.iterrows():
+        new_tags, new_genres = process_tags(row[('track', 'tags')], row[('track', 'genres')])
+        df.at[index, ('track', 'tags')] = new_tags
+        df.at[index, ('track', 'genres')] = new_genres
+
+    
+    # Function to process tags and update genres
+    def update_genres(row):
+        if not row[("track", "genres")]:  # Only process if genres column is empty list []
+            if not row[("track", "tags")]:
+                return row
+
+            original_tags = row[("track", "tags")]
+            cleaned_tags = [re.sub(r'[^a-zA-Z]', '', tag).lower() for tag in row[("track", "tags")]]
+            
+            matched_genres = []
+            for clean_tag in cleaned_tags:
+                for genre in genre_mapping.keys(): 
+                    temp_genre = re.sub(r'[^a-zA-Z]', '', genre)
+                    if temp_genre in clean_tag:
+                        matched_genres.append(genre)
+            matched_genres = set(matched_genres)
+            
+            if matched_genres:
+                # print("Matched genres:", matched_genres)
+                # print("Original tags:", original_tags)
+                updated_tags = []
+                for tag, clean_tag in zip(row[('track', 'tags')], cleaned_tags):
+                    should_keep = True  # Assume we should keep the tag
+                    for genre in matched_genres:
+                        temp_genre = re.sub(r'[^a-zA-Z]', '', genre)
+                        if temp_genre in clean_tag:  # If any genre is found in clean_tag, we discard it
+                            should_keep = False
+                            break  
+                    if should_keep:
+                        updated_tags.append(tag)  # Only add tags that did NOT match any genre
+                
+                # print("Updated tags:",updated_tags)
+                genres_string = ", ".join(matched_genres)
+                
+                row[("track", "genres")] = genres_string
+                row[("track", "tags")] = updated_tags
+
+        return row
+
+
+    df = df.apply(update_genres, axis=1)
 
     def map_genres_to_ids(genre_str):
-        if pd.isna(genre_str):
+        if genre_str == "":
             return []
         # Split on commas and strip whitespace
-        genres = [g.strip() for g in genre_str.split(",")]
+        genres = [g.strip().lower() for g in genre_str.split(",")]
         # Map each genre to its corresponding genre_id (ignoring ones not in the mapping)
         return [genre_mapping[g] for g in genres if g in genre_mapping]
 
     # Update the (track, genres) column with lists of genre_ids
     df[("track", "genres")] = df[("track", "genres")].apply(map_genres_to_ids)
-
-    # Convert (track, tags) column to list of top 10 tags
-    def process_tags(tags_str):
-        if pd.isna(tags_str):
-            return tags_str
-        tags_dict = eval(tags_str)
-        sorted_tags = sorted(
-            tags_dict.items(), key=lambda item: int(item[1]), reverse=True)
-        top_10_tags = [tag for tag, _ in sorted_tags[:10]]
-        return top_10_tags
-
-    df[('track', 'tags')] = df[('track', 'tags')].apply(process_tags)
-
+    
+    
     # Create the track_url column
     base_url = "https://open.spotify.com/search/"
     df[("track", "track_url")] = base_url + df[("track", "title")]
@@ -142,7 +210,7 @@ def create_album_data(df):
         track_ids=('track_id', list),             # List the track_ids
         artist_name = ('artist_name', 'first'),
         album_date_released = ('track_year', 'first'),
-        tags = ('track_tags', list)
+        tags = ('track_tags', lambda x : list(set([item for sublist in x for item in sublist])))
     )
 
     # reset index to a new index and get the album_id as a column again
@@ -184,7 +252,7 @@ def create_artist_data(df):
         track_ids=('track_id', list),
         album_ids=('album_id', lambda x: list(
             x.unique())) , # Unique album IDs
-        tags = ('track_tags', list)
+        tags = ('track_tags', lambda x : list(set([item for sublist in x for item in sublist])))
     )
 
     artist_df['artist_image_file'] = np.nan

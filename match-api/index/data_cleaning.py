@@ -23,7 +23,11 @@ def clean_track_data():
     track_data = pd.read_csv('data/fma_metadata/tracks.csv', index_col=0, header=[0, 1]) # warning: code later relies on the track id being the index
     msd_data = pd.read_csv('data/msd_metadata/msd.csv')
     msd_data= create_track_data_multiindex(msd_data)
-    
+    msd_data[('track', 'tags')] = msd_data[('track', 'tags')].apply(str)
+    fma_max_album_id = track_data[('album', 'id')].max()
+    msd_data[('album', 'id')] += fma_max_album_id + 2
+    print(msd_data[('album', 'id')].min(), msd_data[('album', 'id')].max())
+        
     # load raw tracks
     raw_tracks = pd.read_csv('data/fma_metadata/raw_tracks.csv')
 
@@ -40,6 +44,10 @@ def clean_track_data():
     # drop tracks with no titles
     nan_track_titles = track_data[track_data[("track", "title")].isna()].index
     track_data.drop(nan_track_titles, inplace=True)
+
+    # drop msd tracks with no titles
+    msd_nan_track_titles = msd_data[msd_data[("track", "title")].isna()].index
+    msd_data.drop(msd_nan_track_titles, inplace = True)
 
     # fix image urls
     track_data[("track", "track_image_file")] = track_data.index.map(lambda x: fix_album_cover_url(track_data, x))
@@ -115,13 +123,11 @@ def make_album_data(track_data):
     msd_track_data = pd.read_csv('data/msd_metadata/msd.csv')
     msd_track_data = create_track_data_multiindex(msd_track_data)
     msd_album_data = create_album_data(msd_track_data)
-    fma_max_album_id = album_data['album_id'].max()
-    msd_album_data['album_id'] += fma_max_album_id + 2
-    print(msd_album_data['album_id'].min(), msd_album_data['album_id'].max())
+    
+    msd_album_data['tags'] = msd_album_data['tags'].apply(str)
     # Find common columns
     common_columns = album_data.columns.intersection(msd_album_data.columns)
 
-    print("max album id", fma_max_album_id)
     # Print common columns
     print("Common columns:", common_columns.tolist())
 
@@ -130,6 +136,9 @@ def make_album_data(track_data):
     album_data = album_data[common_columns]
     msd_album_data = msd_album_data[common_columns]
     album_data = pd.concat([album_data, msd_album_data], axis=0, ignore_index=False)
+
+    nan_album_titles =album_data[ album_data[("album_title")].isna()].index
+    album_data.drop(nan_album_titles, inplace =True)
 
     # fix image urls
     album_data[("album_image_file")] = album_data.index.map(lambda x: fix_album_cover_url(album_data, x, True))
@@ -180,7 +189,7 @@ def make_artist_data(track_data):
     msd_track_data = pd.read_csv('data/msd_metadata/msd.csv')
     msd_track_data = create_track_data_multiindex(msd_track_data)
     msd_artist_data = create_artist_data(msd_track_data)
-
+    msd_artist_data['tags'] = msd_artist_data['tags'].apply(str)
     # Find common columns
     common_columns = artist_data.columns.intersection(msd_artist_data.columns)
     
@@ -193,6 +202,9 @@ def make_artist_data(track_data):
     msd_artist_data = msd_artist_data[common_columns]
 
     artist_data = pd.concat([artist_data, msd_artist_data], axis=0, ignore_index=False)
+
+    nan_artist_names = artist_data[artist_data[("artist_name")].isna()].index
+    artist_data.drop(nan_artist_names, inplace = True)
 
     # make a copy of the track data we care about
     temp_track_data = track_data[[('artist', 'name'), ('track', 'title'), ('track', 'genres'), ('album', 'id')]].copy()
