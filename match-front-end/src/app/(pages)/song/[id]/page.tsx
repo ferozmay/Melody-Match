@@ -14,7 +14,9 @@ const SongPage = () => {
   const { isPlaying, togglePlaying } = useAudioPlayback(song);
 
   useEffect(() => {
+    console.log("Fetching song for ID:", id);
     getSong(id).then((song) => {
+      console.log("Fetched Song Data:", song); 
       setSong(song);
     });
   }, [id]);
@@ -66,7 +68,7 @@ const SongPage = () => {
             {convertRuntime(Number(song?.runtime))}
           </p>
           <p className="text-lg text-gray-400 text-left mb-4">
-            {song?.topGenre || "Unknown"}
+            {song?.genres || "Unknown"}
           </p>
 
           {/* Play Button */}

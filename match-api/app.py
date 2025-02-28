@@ -39,7 +39,6 @@ print("App loaded successfully! Time taken: ", app_end_time - app_start_time)
 def get_song(track_id):
     return index.track_ids_to_data(int(track_id), include_similar=True)
 
-
 @app.route("/api/albums/<album_id>")
 def get_album(album_id):
     return index.album_ids_to_data(int(album_id), include_tracks=True)
@@ -59,14 +58,13 @@ def handle_request():
         # these hyperparamters are reported to be sensible for BM25 algorithm, but we can evaluate different settings for our use case 
         hyperparams = {'k':1.2, 'b':0.75}
         track_scores, album_scores, artist_scores = search_rank(query, index.index, index.doclengths_track_data, index.doclengths_album_data, index.doclengths_artist_data,  collection_size, hyperparams)
-        
-
+            
         # temporarily just ordered based on the title score
         sorted_track_scores = sorted(track_scores.items(), key=lambda item: sum(item[1]), reverse=True)
         sorted_album_scores = sorted(album_scores.items(), key=lambda item: sum(item[1]), reverse=True)
         sorted_artist_scores = sorted(artist_scores.items(), key=lambda item: sum(item[1]), reverse=True)
         
-        
+
         ranked_track_ids = [track_id for track_id, _ in sorted_track_scores][:limit] 
         ranked_album_ids = [album_id for album_id, _ in sorted_album_scores][:limit]
         ranked_artist_ids = [artist_id for artist_id, _ in sorted_artist_scores][:limit]
