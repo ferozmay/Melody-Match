@@ -57,7 +57,7 @@ const SongCard = ({
             {song.title}
           </h3>
 
-          <p className="line-clamp-1">{song.artist}</p>
+          <p className="text-gray-200 line-clamp-1">{song.artist}</p>
           <p className="text-gray-400">{runtime}</p>
         </div>
 
