@@ -58,8 +58,7 @@ def handle_request():
         # these hyperparamters are reported to be sensible for BM25 algorithm, but we can evaluate different settings for our use case 
         hyperparams = {'k':1.2, 'b':0.75}
         track_scores, album_scores, artist_scores = search_rank(query, index.index, index.doclengths_track_data, index.doclengths_album_data, index.doclengths_artist_data,  collection_size, hyperparams)
-        
-
+            
         # temporarily just ordered based on the title score
         sorted_track_scores = sorted(track_scores.items(), key=lambda item: sum(item[1]), reverse=True)
         sorted_album_scores = sorted(album_scores.items(), key=lambda item: sum(item[1]), reverse=True)

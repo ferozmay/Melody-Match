@@ -52,6 +52,9 @@ const AlbumPage = () => {
               Released: {album?.releaseDate}
             </p>
           )}
+           <p className="text-lg text-gray-400 text-left mb-4">
+            {album?.genres || "Unknown"}
+          </p>
         </div>
       </div>
       <div className="w-full my-10 max-w-5xl mx-10  md:space-x-8">

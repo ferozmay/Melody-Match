@@ -68,7 +68,7 @@ const SongPage = () => {
             {convertRuntime(Number(song?.runtime))}
           </p>
           <p className="text-lg text-gray-400 text-left mb-4">
-            {song?.topGenre || "Unknown"}
+            {song?.genres || "Unknown"}
           </p>
 
           {/* Play Button */}
