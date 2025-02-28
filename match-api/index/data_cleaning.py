@@ -207,7 +207,7 @@ def make_artist_data(track_data):
     artist_data.drop(nan_artist_names, inplace = True)
 
     # make a copy of the track data we care about
-    temp_track_data = track_data[[('artist', 'name'), ('track', 'title'), ('track', 'genres'), ('album', 'id')]].copy()
+    temp_track_data = track_data[[('artist', 'name'), ('track', 'title'), ('track', 'genres'), ('track', 'genres_all'), ('track', 'genre_top'), ('album', 'id'), ('artist', 'bio')]].copy()
 
     # group the track data by artist, and gather the songs by each artist and the genres of each song
     track_ids = temp_track_data.groupby(('artist', 'name')).apply(lambda x: list(x.index), include_groups = False).reset_index(name=('track', 'ids'))
@@ -255,15 +255,9 @@ def fix_album_cover_url(data_df, track_or_album_id, album=False):
         album_info = data_df.loc[track_or_album_id]
         album_cover_path = album_info[("album_image_file")]
 
-    placeholder = "https://community.mp3tag.de/uploads/default/original/2X/a/acf3edeb055e7b77114f9e393d1edeeda37e50c9.png"
-
-    
     if isinstance(album_cover_path, float) and np.isnan(album_cover_path):
-        return placeholder
+        return None
 
-    if album_cover_path is None:
-        return placeholder
-    
     if 'albums' in album_cover_path:
         actual_url = album_cover_path.replace("file/images/albums/", "image/?file=images%2Falbums%2F")
         actual_url = actual_url + "&width=290&height=290&type=album"
@@ -271,7 +265,7 @@ def fix_album_cover_url(data_df, track_or_album_id, album=False):
         actual_url = album_cover_path.replace("file/images/tracks/", "image/?file=images%2Ftracks%2F")
         actual_url = actual_url + "&width=290&height=290&type=track"
     else:
-        return placeholder
+        return None
     return actual_url
 
 def fix_artist_image_url(data_df, artist_id):

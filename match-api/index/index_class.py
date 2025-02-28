@@ -1,6 +1,7 @@
 from index.store_load import load_data
 import numpy as np
 import json
+import pandas as pd
 
 
 def handle_nan(value):
@@ -28,7 +29,12 @@ class Index:
             similar_songs = []
             if include_similar:
                 similar_songs = json.loads(self.track_ids_to_data(track_data.iloc[:10].index.tolist()))
-            
+
+            genres = track_info[("track", "genres")]
+            if not genres:  
+                genres = "Unknown"  
+            else:
+                genres = genre_ids_to_words(genres) 
             data.append({
                 "id": track_id,
                 "title": handle_nan(track_info[("track", "title")]),
@@ -39,7 +45,9 @@ class Index:
                 "artistLink": handle_nan(track_info.get(("track", "artist_url"))),
                 "album": handle_nan(track_info[("album", "title")]),
                 "albumLink": handle_nan(track_info.get(("track", "album_url"))),
-                "topGenre": handle_nan(track_info.get(("track", "genre_top"))),
+                "genres": genres,
+                "albumId": handle_nan(track_info[("album", "id")]),
+                "artistId": handle_nan(track_info[("artist", "id")]),
                 "similarSongs": similar_songs
             })
         
@@ -61,9 +69,14 @@ class Index:
             album_info = album_data.loc[album_id]
             album_tracks = []
             if include_tracks:
-                album_tracks = json.loads(
-                    self.track_ids_to_data(album_info[("track_ids")]))
-
+                album_tracks = json.loads(self.track_ids_to_data(album_info[("track_ids")]))
+            
+            # turn album gernres dictionary (id: frequency) into a list of genre ids
+            album_genres = album_info[("album_genres")]
+            album_genres = [genre_id for genre_id, _ in album_genres.items()]
+            # turn genre ids into genre names
+            album_info["album_genres"] = genre_ids_to_words(album_genres)
+            
             data.append({
                 "id": album_id,
                 "title": handle_nan(album_info[("album_title")]),
@@ -72,7 +85,8 @@ class Index:
                 "albumCover": handle_nan(album_info[("album_image_file")]),
                 "noOfTracks": handle_nan(album_info[("album_tracks")]),
                 "link": handle_nan(album_info[("album_url")]),
-                "songs": album_tracks
+                "genres:": album_info["album_genres"],
+                "songs": album_tracks,
             })
 
         if single:
@@ -104,8 +118,23 @@ class Index:
                 "artistImage": handle_nan(artist_info[("artist_image_file")]),
                 "link": handle_nan(artist_info[("artist_url")]),
                 "songs": songs,
-                "albums": albums
+                "albums": albums,
+                "bio": handle_nan(artist_info[("artist_bio")])
             })
         if single:
             return json.dumps(data[0], default=str)
         return json.dumps(data, default=str)
+
+def genre_ids_to_words(genre_ids):
+    genre_data = pd.read_csv("data/fma_metadata/genres.csv")
+    genre_names = []
+    
+    for genre_id in genre_ids:
+        matching_genre = genre_data.loc[genre_data["genre_id"] == genre_id]
+        
+        if not matching_genre.empty:
+            genre_name = matching_genre["title"].values[0]
+            genre_names.append(genre_name)
+        else:
+            genre_names.append("Unknown") 
+    return ", ".join(genre_names)
