@@ -106,7 +106,7 @@ if __name__ == '__main__':
     fasttext.util.download_model('en', if_exists='ignore')
     ft = fasttext.load_model('cc.en.300.bin')
 
-    # Load the lyrics_inverted_index
+    # Load / create the lyrics similarity dictionary (it is iteratively created as a json so that it can be resumed)
     lyrics_similarity_dict = create_lyrics_similarity_dict(all_words, ft, save_path='data/lyrics_similarity_dict.json', batch_size=100)
 
     # Save the lyrics_similarity_dict as a pickle for faster loading

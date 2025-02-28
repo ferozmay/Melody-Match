@@ -11,12 +11,12 @@ import fasttext
 import fasttext.util
 from utils.text_processing import normalize, process_text
 
-def load_lyrics_inverted_index(path='data/lyrics_inverted_idx.pkl'):
-    '''load the lyrics_inverted_index from a pickle file'''
-    with open(path, 'rb') as file:
-        lyrics_inverted_index = pickle.load(file)
-    print(f"lyrics_inverted_index loaded from pickle at {path}")
-    return lyrics_inverted_index
+# def load_lyrics_inverted_index(path='data/lyrics_inverted_idx.pkl'):
+#     '''load the lyrics_inverted_index from a pickle file'''
+#     with open(path, 'rb') as file:
+#         lyrics_inverted_index = pickle.load(file)
+#     print(f"lyrics_inverted_index loaded from pickle at {path}")
+#     return lyrics_inverted_index
 
 def load_lyrics_similarity_dict(path='data/lyrics_similarity_dict.pkl'):
     '''load the lyrics_similarity_dict from a pickle file'''
@@ -30,10 +30,10 @@ def load_expansion_model_dicts(ft_path, lyrics_similarity_dict_path, lyrics_inve
     ft = fasttext.load_model(ft_path)
     print("fasttext model loaded")
 
+    # Load similar words dictionary
     lyrics_similarity_dict = load_lyrics_similarity_dict(lyrics_similarity_dict_path)
-    lyrics_inverted_index = load_lyrics_inverted_index(lyrics_inverted_index_path)
 
-    return ft, lyrics_similarity_dict, lyrics_inverted_index
+    return ft, lyrics_similarity_dict
 
 def expand_query(query, lyrics_similarity_dict: dict, embeddings, verbose=False):
     '''
@@ -76,9 +76,7 @@ def expand_query(query, lyrics_similarity_dict: dict, embeddings, verbose=False)
 if __name__ == '__main__':
 
     # Load all required models and dicts
-    ft, lyrics_similarity_dict, lyrics_inverted_index = load_expansion_model_dicts('cc.en.300.bin', 
-                                                                                'data/lyrics_similarity_dict.pkl', 
-                                                                                'data/lyrics_inverted_idx.pkl')
+    ft, lyrics_similarity_dict = load_expansion_model_dicts('cc.en.300.bin', 'data/lyrics_similarity_dict.pkl')
 
     # Example query
     query = 'reew ewre love'
