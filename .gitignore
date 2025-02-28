@@ -60,6 +60,10 @@ similarity_research/models/FMA_similarity_dict.json
 similarity_research/models/
 *.mp3
 
+# Lyrics query expansion
+lyrics_search/cc.en.300.bin
+lyrics_search/data
+
 # virtual environments
 venv/
 .venv/
