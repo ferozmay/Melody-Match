@@ -35,23 +35,20 @@ def store_data():
     print(pp_artist_data.head())
     print(pp_artist_data.tail())
     entire_doclengths_dfs = (doclengths_track_data, doclengths_album_data, doclengths_artist_data)
-    # # create inverted index
+    # create inverted index
     inverted_index = create_inverted_index(entire_pp_dfs)
     # create lists of keys for each data frame we will store
     entire_df_keys = ['track_data_df', 'album_data_df', 'artist_data_df', 'genres_data_df']
     entire_pp_df_keys = ['pp_track_data_df', 'pp_album_data_df', 'pp_artist_data_df']
     entire_doclengths_df_keys = ['doclengths_track_data_df', 'doclengths_album_data_df', 'doclengths_artist_data_df']
-    # #loop over data frame and key pairs when storing to single hdf5 file
-    # for df, key  in zip(entire_dfs, entire_df_keys):
-    #     df.to_hdf('data/stored_data/dataframes.h5', key=key , mode='a')
-    # for df, key in zip(entire_pp_dfs, entire_pp_df_keys):
-    #     df.to_hdf('data/stored_data/dataframes.h5', key=key , mode='a')
-    # for df, key in zip(entire_doclengths_dfs, entire_doclengths_df_keys):
-    #     df.to_hdf('data/stored_data/dataframes.h5', key=key , mode='a')
+    #loop over data frame and key pairs when storing to single hdf5 file
+    for df, key  in zip(entire_dfs, entire_df_keys):
+        df.to_hdf('data/stored_data/dataframes.h5', key=key , mode='a')
+    for df, key in zip(entire_pp_dfs, entire_pp_df_keys):
+        df.to_hdf('data/stored_data/dataframes.h5', key=key , mode='a')
+    for df, key in zip(entire_doclengths_dfs, entire_doclengths_df_keys):
+        df.to_hdf('data/stored_data/dataframes.h5', key=key , mode='a')
 
-    # # pickle the inverted index
-    # with open("data/stored_data/inverted_index.pkl", "wb") as f:
-    #     pickle.dump(inverted_index, f)
 
 def load_data():
     """Loads the data frames and the inverted index. We only load the necessary ones."""
