@@ -1,4 +1,11 @@
-'''Save a dictionary with similar words for all 5000 words in lyrics'''
+'''
+Functions to create the inversed index for the lyrics dataset,
+And to create a dictionary with similar words for all 5000 words in lyrics
+
+Lyrics in BOW format can be downloaded from here:
+train_file: http://millionsongdataset.com/sites/default/files/AdditionalFiles/mxm_dataset_train.txt.zip
+test_file: http://millionsongdataset.com/sites/default/files/AdditionalFiles/mxm_dataset_test.txt.zip
+'''
 import json
 import os
 from tqdm import tqdm
@@ -6,6 +13,38 @@ from utils.text_processing import normalize
 import fasttext
 import fasttext.util
 import pickle
+
+
+def read_lyrics(lyrics_train_path, lyrics_test_path):
+    '''
+    Combine the lyrics from the train and test files into a dictionary
+    
+    Returns: a dictionary with the format {'word': {'track_id': counts}} 
+    '''
+    lyrics_dict = {}
+
+    # Read the lyrics from the train and test files
+    for lyrics_path in [lyrics_train_path, lyrics_test_path]:
+        with open(lyrics_path, 'r') as file:
+            for line in file:
+                if line.startswith('#'):
+                    continue # It is a comment
+                if line.startswith('%'):
+                    # List of all words
+                    all_words = line[1:].split(',')
+                elif line.startswith('TR'):
+                    line = line.split(',')
+                    track_id = line[0]
+                    word_dict = {int(id): int(freq) for id_freq in line[2:] for id, freq in [id_freq.split(':')]}
+                    lyrics_dict[track_id] = word_dict
+
+    # Make mappings from indices to words, where idx starts at 1
+    index_to_word = {index+1: word for index, word in enumerate(all_words)}
+
+    # Convert the indexes into words
+    lyrics_word_dict = {track_id: {index_to_word[int(id)]: int(freq) for id, freq in word_dict.items()} for track_id, word_dict in lyrics_dict_idx.items()}
+
+    return lyrics_word_dict, set(all_words)
 
 def create_lyrics_similarity_dict(all_words, embeddings, save_path='lyrics_similarity_dict.json', batch_size=100):
     '''
@@ -58,12 +97,14 @@ def save_lyrics_similarity_dict(lyrics_similarity_dict, path='data/lyrics_simila
 
 if __name__ == '__main__':
 
-    # Load the fasttext modelimport fasttext
-    ft = fasttext.load_model('cc.en.300.bin')
+    # Load the lyrics
+    lyrics_train_path = 'data/lyrics_train.txt'
+    lyrics_test_path = 'data/lyrics_test.txt'
+    lyrics_word_dict, all_words = read_lyrics(lyrics_train_path, lyrics_test_path)
 
-    # Load all words
-    with open('data/all_words.txt', 'r', encoding='utf-8') as f:
-        all_words = f.read().splitlines()
+    # Load the fasttext modelimport fasttext
+    fasttext.util.download_model('en', if_exists='ignore')
+    ft = fasttext.load_model('cc.en.300.bin')
 
     # Load the lyrics_inverted_index
     lyrics_similarity_dict = create_lyrics_similarity_dict(all_words, ft, save_path='data/lyrics_similarity_dict.json', batch_size=100)
