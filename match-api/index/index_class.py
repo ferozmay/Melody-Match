@@ -1,4 +1,4 @@
-from index.store_load import load_data
+from index.store_load import load_data, store_data
 import numpy as np
 import json
 
@@ -17,8 +17,12 @@ def handle_nan(value):
 
 
 class Index:
+    def build_index(self):
+        store_data()
+
     def load_index(self):
         self.track_data, self.album_data, self.artist_data, self.doclengths_track_data, self.doclengths_album_data, self.doclengths_artist_data, self.index = load_data()
+        print(self.track_data)
     
     def get_similar_songs(self, song_id):
         scored_songs = similar_songs_dict.get(str(song_id), [])
