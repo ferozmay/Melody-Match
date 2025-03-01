@@ -37,6 +37,8 @@ class Index:
             track_ids = [track_ids]
             single = True
         for track_id in track_ids:
+            if track_id not in track_data.index:
+                continue
             track_info = track_data.loc[track_id]
             similar_songs = []
             if include_similar:
@@ -48,11 +50,11 @@ class Index:
                 "artist": handle_nan(track_info[("artist", "name")]),
                 "runtime": handle_nan(track_info[("track", "duration")]),
                 "albumCover": handle_nan(track_info[("track", "track_image_file")]),
-                "link": handle_nan(track_info[("track","track_url")]),
-                "artistLink": handle_nan(track_info[("track", "artist_url")]),
+                "link": handle_nan(track_info[("track", "track_url")]),
+                "artistLink": handle_nan(track_info.get(("track", "artist_url"))),
                 "album": handle_nan(track_info[("album", "title")]),
-                "albumLink": handle_nan(track_info[("track", "album_url")]),
-                "topGenre": handle_nan(track_info[("track", "genre_top")]),
+                "albumLink": handle_nan(track_info.get(("track", "album_url"))),
+                "topGenre": handle_nan(track_info.get(("track", "genre_top"))),
                 "similarSongs": similar_songs
             })
         
@@ -69,10 +71,13 @@ class Index:
             single = True
 
         for album_id in album_ids:
+            if album_id not in album_data.index:
+                continue
             album_info = album_data.loc[album_id]
             album_tracks = []
             if include_tracks:
-                album_tracks = json.loads(self.track_ids_to_data(album_info[("track_ids")]))
+                album_tracks = json.loads(
+                    self.track_ids_to_data(album_info[("track_ids")]))
 
             data.append({
                 "id": album_id,
@@ -84,7 +89,7 @@ class Index:
                 "link": handle_nan(album_info[("album_url")]),
                 "songs": album_tracks
             })
-        
+
         if single:
             return json.dumps(data[0], default=str)
         return json.dumps(data, default=str)
@@ -97,17 +102,21 @@ class Index:
             single = True
             artist_ids = [artist_ids]
         for artist_id in artist_ids:
+            if artist_id not in artist_data.index:
+                continue
             artist_info = artist_data.loc[artist_id]
             albums = []
             songs = []
             if include_albums:
-                albums = json.loads(self.album_ids_to_data(artist_info[("album_ids")], include_tracks=True))
+                albums = json.loads(self.album_ids_to_data(
+                    artist_info[("album_ids")], include_tracks=True))
             if include_tracks:
-                songs = json.loads(self.track_ids_to_data(artist_info[("track_ids")]))
+                songs = json.loads(self.track_ids_to_data(
+                    artist_info[("track_ids")]))
             data.append({
                 "id": artist_id,
                 "name": handle_nan(artist_info[("artist_name")]),
-                "artistImage" : handle_nan(artist_info[("artist_image_file")]),
+                "artistImage": handle_nan(artist_info[("artist_image_file")]),
                 "link": handle_nan(artist_info[("artist_url")]),
                 "songs": songs,
                 "albums": albums
