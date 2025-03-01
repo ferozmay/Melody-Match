@@ -1,10 +1,12 @@
 '''
-Use fasttext to expand the query with similar words from the lyrics BOW.
+Use fasttext to expand the query with similar words from the lyrics BOW. Return a set with the tokens and it similar words
 Info: https://fasttext.cc/docs/en/crawl-vectors.html
 
 To install fasttext & the english model, run the following commands:
 !pip install fasttext
 fasttext.util.download_model('en', if_exists='ignore')  # English
+
+
 '''
 import pickle
 import fasttext
@@ -25,7 +27,7 @@ def load_lyrics_similarity_dict(path='data/lyrics_similarity_dict.pkl'):
     print(f"lyrics_similarity_dict loaded from pickle at {path}")
     return lyrics_similarity_dict
 
-def load_expansion_model_dicts(ft_path, lyrics_similarity_dict_path, lyrics_inverted_index_path):
+def load_expansion_model_dicts(ft_path, lyrics_similarity_dict_path):
     # Load word2vec model
     ft = fasttext.load_model(ft_path)
     print("fasttext model loaded")
@@ -35,7 +37,7 @@ def load_expansion_model_dicts(ft_path, lyrics_similarity_dict_path, lyrics_inve
 
     return ft, lyrics_similarity_dict
 
-def expand_query(query, lyrics_similarity_dict: dict, embeddings, verbose=False):
+def expand_query(query, lyrics_similarity_dict: dict, embeddings, verbose=False) -> set:
     '''
     Given a query, expand it with similar tokens from the lyrics BOW.
 
@@ -76,9 +78,9 @@ def expand_query(query, lyrics_similarity_dict: dict, embeddings, verbose=False)
 if __name__ == '__main__':
 
     # Load all required models and dicts
-    ft, lyrics_similarity_dict = load_expansion_model_dicts('cc.en.300.bin', 'data/lyrics_similarity_dict.pkl')
+    ft, lyrics_similarity_dict = load_expansion_model_dicts('models/cc.en.300.bin', 'data/lyrics_similarity_dict.pkl')
 
     # Example query
-    query = 'reew ewre love'
+    query = 'I love dogs and crocodiles and rererereswe'
     expanded_tokens = expand_query(query, lyrics_similarity_dict, ft, verbose=True)
     print(query, '->', expanded_tokens)
