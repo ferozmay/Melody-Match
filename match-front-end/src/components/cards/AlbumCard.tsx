@@ -9,7 +9,7 @@ const AlbumCard = ({ album }: { album: Album }) => {
       className="cursor-pointer hover:bg-white/10 bg-opacity-10 backdrop-blur-md rounded-lg hover:shadow-lg transition duration-150 p-4 flex flex-col gap-4"
     >
       <img
-        src={album.albumCover}
+        src={album.albumCover || "/images/placeholder.png"}
         alt={album.title}
         className="self-center shadow-lg rounded-lg"
         onError={(e) => {

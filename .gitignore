@@ -58,3 +58,5 @@ venv/
 .venv/
 .DS_Store
 node_modules/
+test.ipynbmatch-api/lyrics_inverted_index.json
+test.ipynb
