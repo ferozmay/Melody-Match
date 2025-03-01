@@ -80,42 +80,41 @@ def search_rank(query: str, index, doclengths_track_data, doclengths_album_data,
                 object_type, document_type = pair
                 
                 if term in index:
-                    # if its a boolean query we only care about the titles
-                    if not is_boolean:
-                        # rank the term for each document type (track, album, artist)
-                        if document_type == 'Name':
+                    # rank the term for each document type (track, album, artist)
+                    if document_type == 'Name':
+                        if object_type == 'Track':
+                            track_title_scores = rank_titles(term, index, object_type, doclengths_track_data, track_title_scores)
+                            term_scores['Track'].update(track_title_scores)
+                        if object_type == 'Album':
+                            album_title_scores = rank_titles(term, index, object_type, doclengths_album_data, album_title_scores)
+                            term_scores['Album'].update(album_title_scores)
+                        if object_type == 'Artist':
+                            artist_title_scores = rank_titles(term, index, object_type, doclengths_artist_data, artist_title_scores)
+                            term_scores['Artist'].update(artist_title_scores)
+
+                    if not is_boolean: # if it a boolean query, we dont care about genres and tags
+                        if document_type == 'Genres':
                             if object_type == 'Track':
-                                track_title_scores = rank_titles(term, index, object_type, doclengths_track_data, track_title_scores)
-                                term_scores['Track'].update(track_title_scores)
+                                track_genres_scores = rank_genres(term, index, object_type, doclengths_track_data, track_genres_scores)
+                                term_scores['Track'].update(track_genres_scores)
                             if object_type == 'Album':
-                                album_title_scores = rank_titles(term, index, object_type, doclengths_album_data, album_title_scores)
-                                term_scores['Album'].update(album_title_scores)
+                                album_genres_scores = rank_genres(term, index, object_type, doclengths_album_data, album_genres_scores)
+                                term_scores['Album'].update(album_genres_scores)
                             if object_type == 'Artist':
-                                artist_title_scores = rank_titles(term, index, object_type, doclengths_artist_data, artist_title_scores)
-                                term_scores['Artist'].update(artist_title_scores)
-   
-                    if document_type == 'Genres':
-                        if object_type == 'Track':
-                            track_genres_scores = rank_genres(term, index, object_type, doclengths_track_data, track_genres_scores)
-                            term_scores['Track'].update(track_genres_scores)
-                        if object_type == 'Album':
-                            album_genres_scores = rank_genres(term, index, object_type, doclengths_album_data, album_genres_scores)
-                            term_scores['Album'].update(album_genres_scores)
-                        if object_type == 'Artist':
-                            artist_genres_scores = rank_genres(term, index, object_type, doclengths_artist_data, artist_genres_scores)
-                            term_scores['Artist'].update(artist_genres_scores)
-                    
-                    elif document_type == 'Tags':
-                        if object_type == 'Track':
-                            track_tags_scores = rank_tags(term, index, object_type, doclengths_track_data, track_tags_scores)
-                            term_scores['Track'].update(track_tags_scores)
-                        if object_type == 'Album':
-                            album_tags_scores = rank_tags(term, index, object_type, doclengths_album_data, album_tags_scores)
-                            term_scores['Album'].update(album_tags_scores)
-                        if object_type == 'Artist':
-                            artist_tags_scores = rank_tags(term, index, object_type, doclengths_artist_data, artist_tags_scores)
-                            term_scores['Artist'].update(artist_tags_scores)
-            
+                                artist_genres_scores = rank_genres(term, index, object_type, doclengths_artist_data, artist_genres_scores)
+                                term_scores['Artist'].update(artist_genres_scores)
+                        
+                        elif document_type == 'Tags':
+                            if object_type == 'Track':
+                                track_tags_scores = rank_tags(term, index, object_type, doclengths_track_data, track_tags_scores)
+                                term_scores['Track'].update(track_tags_scores)
+                            if object_type == 'Album':
+                                album_tags_scores = rank_tags(term, index, object_type, doclengths_album_data, album_tags_scores)
+                                term_scores['Album'].update(album_tags_scores)
+                            if object_type == 'Artist':
+                                artist_tags_scores = rank_tags(term, index, object_type, doclengths_artist_data, artist_tags_scores)
+                                term_scores['Artist'].update(artist_tags_scores)
+                
         # applyboolean logic to term scores
         if current_set is None:
             # initialise the set with the first term's results
