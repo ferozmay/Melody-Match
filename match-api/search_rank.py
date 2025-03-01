@@ -6,25 +6,42 @@ import itertools
 N = None
 k, b = (None, None)
 hyperparams = None
-def search_rank(query: str, index, doclengths_track_data, doclengths_album_data, doclengths_artist_data, collection_size: int, hyperparams_dict: dict):
-    """This function takes in a query, the index, teh various document lengths dfs and the collection size and hyperparameters for the search.
-    It then makes the collection size and hyperparameters arguments global variables so they can be used in the BM25 calculation later.
-    It then intialises nine dictionaries for the different document combinations, and goes through each combination and for each term in a query it
-    it upadates the nine dicitonaries giving a BM25 score for each document. The nine dictionaries are converted to three, so they can be presented by the front-end.
-    Each entry of the final dicitonaries is of the form {doc_id: (name_score, genres_score, tags_score)}.
-    This means that the tracks_scores dictionary for example will contain ids for all the tracks relevant to the search/ query and associated with each id will be a 
-     score for the relevance of the track name, the track's genres and the track's tags to the query. """
 
-    # make some arguments global
+import re
+import itertools
+
+def parse_boolean_query(query):
+    # regex looks for either:
+    # 1. A word that's uppercase: AND, OR, NOT
+    # 2. A word that's lowercase or mixed-case (which we assume to be a term).
+    tokens = re.findall(r'\b(?:AND|OR|NOT|\w+)\b', query)
+    
+    is_boolean = False
+    # filter tokens to ensure only uppercase AND, OR, and NOT are considered operators
+    parsed_tokens = []
+    for token in tokens:
+        if token in ['AND', 'OR', 'NOT']:
+            # make sure the operator is uppercase
+            parsed_tokens.append(token)
+            is_boolean = True
+        else:
+            # treat everything else as a search term
+            parsed_tokens.append(token.lower())
+    
+    return parsed_tokens, is_boolean
+
+def search_rank(query: str, index, doclengths_track_data, doclengths_album_data, doclengths_artist_data, collection_size: int, hyperparams_dict: dict):
+
     global N, k, b, hyperparams
     N = collection_size
     hyperparams = hyperparams_dict
     k = hyperparams['k']
     b = hyperparams['b']
 
-    query_tokens = process_text(query).split()
+    # parse the boolean query
+    query_tokens, is_boolean = parse_boolean_query(query)
 
-    #initailise dictionaries
+    # initialise dictionaries
     track_title_scores = dict()
     album_title_scores = dict()
     artist_title_scores = dict()
@@ -39,42 +56,97 @@ def search_rank(query: str, index, doclengths_track_data, doclengths_album_data,
     document_types = ['Name', 'Genres', 'Tags']
     pairs = list(itertools.product(object_types, document_types))
     
-    for pair in pairs:
-        for term in query_tokens:
-            if term in index:
-                if pair[1] == 'Name':
-                    if pair[0] == 'Track':
-                        track_title_scores = rank_titles(term, index, pair[0], doclengths_track_data, track_title_scores)
-                    if pair[0] == 'Album':
-                        album_title_scores = rank_titles(term, index, pair[0], doclengths_album_data,  album_title_scores)
-                    if pair[0] == 'Artist':
-                        artist_title_scores = rank_titles(term, index, pair[0], doclengths_artist_data,  artist_title_scores)
-                if pair[1] == 'Genres':
-                    if pair[0] == 'Track':
-                        track_genres_scores = rank_genres(term, index, pair[0],  doclengths_track_data,  track_genres_scores)
-                    if pair[0] == 'Album':
-                        album_genres_scores = rank_genres(term, index, pair[0],  doclengths_album_data, album_genres_scores)
-                    if pair[0] == 'Artist':
-                        artist_genres_scores = rank_genres(term, index, pair[0],  doclengths_artist_data,  artist_genres_scores)
-                if pair[1] == 'Tags':
-                    if pair[0] == 'Track':
-                        track_tags_scores = rank_tags(term, index, pair[0], doclengths_track_data,  track_tags_scores)
-                    if pair[0] == 'Album':
-                        album_tags_scores = rank_tags(term, index, pair[0], doclengths_album_data,  album_tags_scores)
-                    if pair[0] == 'Artist':
-                        artist_tags_scores = rank_tags(term, index, pair[0], doclengths_artist_data,  artist_tags_scores)
-            else:
-                continue        
-    #track dictionary
+    # process each token with Boolean logic
+    current_set = None  # holds thhe set of document IDs after applying Boolean logic
+    current_operator = "AND"  # default operator (for the first term)
+
+    for token in query_tokens:
+        print(f"Processing token: {token}")
+        if token in ['AND', 'OR', 'NOT']:
+            current_operator = token
+        else:
+            # if it's a term, get the scores for this term
+            term = token.lower()
+
+            # initialise the term_scores for this token
+            term_scores = {
+                'Track': dict(),
+                'Album': dict(),
+                'Artist': dict()
+            }
+            
+            # process each document type (Track, Album, Artist)
+            for pair in pairs:
+                object_type, document_type = pair
+                
+                if term in index:
+                    # if its a boolean query we only care about the titles
+                    if not is_boolean:
+                        # rank the term for each document type (track, album, artist)
+                        if document_type == 'Name':
+                            if object_type == 'Track':
+                                track_title_scores = rank_titles(term, index, object_type, doclengths_track_data, track_title_scores)
+                                term_scores['Track'].update(track_title_scores)
+                            if object_type == 'Album':
+                                album_title_scores = rank_titles(term, index, object_type, doclengths_album_data, album_title_scores)
+                                term_scores['Album'].update(album_title_scores)
+                            if object_type == 'Artist':
+                                artist_title_scores = rank_titles(term, index, object_type, doclengths_artist_data, artist_title_scores)
+                                term_scores['Artist'].update(artist_title_scores)
+   
+                    if document_type == 'Genres':
+                        if object_type == 'Track':
+                            track_genres_scores = rank_genres(term, index, object_type, doclengths_track_data, track_genres_scores)
+                            term_scores['Track'].update(track_genres_scores)
+                        if object_type == 'Album':
+                            album_genres_scores = rank_genres(term, index, object_type, doclengths_album_data, album_genres_scores)
+                            term_scores['Album'].update(album_genres_scores)
+                        if object_type == 'Artist':
+                            artist_genres_scores = rank_genres(term, index, object_type, doclengths_artist_data, artist_genres_scores)
+                            term_scores['Artist'].update(artist_genres_scores)
+                    
+                    elif document_type == 'Tags':
+                        if object_type == 'Track':
+                            track_tags_scores = rank_tags(term, index, object_type, doclengths_track_data, track_tags_scores)
+                            term_scores['Track'].update(track_tags_scores)
+                        if object_type == 'Album':
+                            album_tags_scores = rank_tags(term, index, object_type, doclengths_album_data, album_tags_scores)
+                            term_scores['Album'].update(album_tags_scores)
+                        if object_type == 'Artist':
+                            artist_tags_scores = rank_tags(term, index, object_type, doclengths_artist_data, artist_tags_scores)
+                            term_scores['Artist'].update(artist_tags_scores)
+            
+        # applyboolean logic to term scores
+        if current_set is None:
+            # initialise the set with the first term's results
+            current_set = set(term_scores['Track'].keys()) | set(term_scores['Album'].keys()) | set(term_scores['Artist'].keys())
+            print(f"Initial current_set: {current_set}")
+        else:
+            if current_operator == 'AND':
+                current_set &= set(term_scores['Track'].keys()) | set(term_scores['Album'].keys()) | set(term_scores['Artist'].keys())
+                print(f"After AND, current_set: {current_set}")
+            elif current_operator == 'OR':
+                current_set |= set(term_scores['Track'].keys()) | set(term_scores['Album'].keys()) | set(term_scores['Artist'].keys())
+                print(f"After OR, current_set: {current_set}")
+            elif current_operator == 'NOT':
+                current_set -= set(term_scores['Track'].keys()) | set(term_scores['Album'].keys()) | set(term_scores['Artist'].keys())
+                print(f"After NOT, current_set: {current_set}")
+
+
     track_keys = set(track_title_scores.keys()) | set(track_genres_scores.keys()) | set(track_tags_scores.keys())
-    track_scores = {doc_id: (track_title_scores.get(doc_id, 0), track_genres_scores.get(doc_id, 0), track_tags_scores.get(doc_id, 0)) for doc_id in track_keys}
-    #album dictionary
+    print(f"Track keys: {track_keys}")
+
     album_keys = set(album_title_scores.keys()) | set(album_genres_scores.keys()) | set(album_tags_scores.keys())
-    album_scores = {doc_id: (album_title_scores.get(doc_id, 0),  album_genres_scores.get(doc_id, 0),  album_tags_scores.get(doc_id, 0)) for doc_id in album_keys}
-    # artist dictionay
+    print(f"Album keys: {album_keys}")
+
     artist_keys = set(artist_title_scores.keys()) | set(artist_genres_scores.keys()) | set(artist_tags_scores.keys())
-    artist_scores = {doc_id: (artist_title_scores.get(doc_id, 0), artist_genres_scores.get(doc_id, 0),  artist_tags_scores.get(doc_id, 0)) for doc_id in artist_keys}
-    
+    print(f"Artist keys: {artist_keys}")
+
+    # after processing all tokens and applying Boolean logic, get final scores
+    track_scores = {doc_id: (track_title_scores.get(doc_id, 0), track_genres_scores.get(doc_id, 0), track_tags_scores.get(doc_id, 0)) for doc_id in current_set}
+    album_scores = {doc_id: (album_title_scores.get(doc_id, 0), album_genres_scores.get(doc_id, 0), album_tags_scores.get(doc_id, 0)) for doc_id in current_set}
+    artist_scores = {doc_id: (artist_title_scores.get(doc_id, 0), artist_genres_scores.get(doc_id, 0), artist_tags_scores.get(doc_id, 0)) for doc_id in current_set}
+
     return track_scores, album_scores, artist_scores
 
 def rank_titles(term, index, object_type, doclengths_df, scores:dict):
