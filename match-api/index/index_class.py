@@ -72,10 +72,10 @@ class Index:
                 album_tracks = json.loads(self.track_ids_to_data(album_info[("track_ids")]))
             
             # turn album gernres dictionary (id: frequency) into a list of genre ids
-            album_genres = album_info[("album_genres")]
-            album_genres = [genre_id for genre_id, _ in album_genres.items()]
+            genres = album_info[("album_genres")]
+            genres = [genre_id for genre_id, _ in genres.items()]
             # turn genre ids into genre names
-            album_info["album_genres"] = genre_ids_to_words(album_genres)
+            genres = genre_ids_to_words(genres)
             
             data.append({
                 "id": album_id,
@@ -85,7 +85,7 @@ class Index:
                 "albumCover": handle_nan(album_info[("album_image_file")]),
                 "noOfTracks": handle_nan(album_info[("album_tracks")]),
                 "link": handle_nan(album_info[("album_url")]),
-                "genres:": album_info["album_genres"],
+                "genres:": genres,
                 "songs": album_tracks,
             })
 
