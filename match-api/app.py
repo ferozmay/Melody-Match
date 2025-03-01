@@ -18,7 +18,6 @@ cors = CORS(
     resources={r"/api/*": {"origins": ["http://localhost:3000", "http://192.168.0.13:3000"]}}
 )
 
-
 def load_index():
 
     global index
@@ -96,8 +95,8 @@ def handle_request():
 
 
 
-def parse_id(identifier):
+def parse_id(some_id):
     try:
-        return int(identifier)
+        return int(some_id)
     except ValueError:
-        return str(identifier)
+        return str(some_id)
