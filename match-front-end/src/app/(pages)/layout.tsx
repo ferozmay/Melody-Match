@@ -1,3 +1,5 @@
+"use client";
+import PlayerControls from "@/components/common/PlayerControls";
 import Link from "next/link";
 
 export default function Layout({
@@ -7,6 +9,7 @@ export default function Layout({
 }>) {
   return (
     <div className="w-full min-h-screen">
+      <PlayerControls />
       <div className="h-20 flex items-center px-4 lg:px-12 py-2 z-10">
         <Link href="/" className="flex items-center gap-4 no-underline">
           <img

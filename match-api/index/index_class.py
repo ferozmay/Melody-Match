@@ -22,7 +22,6 @@ class Index:
 
     def load_index(self):
         self.track_data, self.album_data, self.artist_data, self.doclengths_track_data, self.doclengths_album_data, self.doclengths_artist_data, self.index = load_data()
-        print(self.track_data)
     
     def get_similar_songs(self, song_id):
         scored_songs = similar_songs_dict.get(str(song_id), [])
@@ -37,6 +36,7 @@ class Index:
             track_ids = [track_ids]
             single = True
         for track_id in track_ids:
+            # [track_data["flag"] == flag]
             if track_id not in track_data.index:
                 continue
             track_info = track_data.loc[track_id]
@@ -52,14 +52,18 @@ class Index:
                 "albumCover": handle_nan(track_info[("track", "track_image_file")]),
                 "link": handle_nan(track_info[("track", "track_url")]),
                 "artistLink": handle_nan(track_info.get(("track", "artist_url"))),
+                "artistId": handle_nan(track_info.get(("artist", "id"))),
                 "album": handle_nan(track_info[("album", "title")]),
                 "albumLink": handle_nan(track_info.get(("track", "album_url"))),
+                "albumId": handle_nan(track_info.get(("album", "id"))),
                 "topGenre": handle_nan(track_info.get(("track", "genre_top"))),
                 "similarSongs": similar_songs
             })
         
         if single:
-            return json.dumps(data[0], default=str)
+            if data:
+                return json.dumps(data[0], default=str)
+            return None
         return json.dumps(data, default=str)
 
     def album_ids_to_data(self, album_ids, include_tracks=False):
@@ -91,7 +95,9 @@ class Index:
             })
 
         if single:
-            return json.dumps(data[0], default=str)
+            if data:
+                return json.dumps(data[0], default=str)
+            return None
         return json.dumps(data, default=str)
 
     def artist_ids_to_data(self, artist_ids, include_tracks=False, include_albums=False):
@@ -122,5 +128,7 @@ class Index:
                 "albums": albums
             })
         if single:
-            return json.dumps(data[0], default=str)
+            if data:
+                return json.dumps(data[0], default=str)
+            return None
         return json.dumps(data, default=str)

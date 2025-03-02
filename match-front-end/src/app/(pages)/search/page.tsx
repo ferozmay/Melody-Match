@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, act } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/components/input/SearchBar";
 import useApiSearch from "@/utils/api/search";
@@ -9,6 +9,7 @@ import SongsTab from "@/components/search/tabs/SongsTab";
 import { SearchResults } from "@/utils/types/searchResults";
 import ArtistsTab from "@/components/search/tabs/ArtistsTab";
 import AlbumsTab from "@/components/search/tabs/AlbumsTab";
+import paginatorStore, { PaginatorStoreProps } from "@/utils/store/paginator";
 
 const TabSelector = ({
   activeTab,
@@ -22,11 +23,11 @@ const TabSelector = ({
     case "All":
       return <AllTab results={results} />;
     case "Songs":
-      return <SongsTab results={results.songs} />;
+      return <SongsTab results={results} />;
     case "Artists":
-      return <ArtistsTab results={results.artists} />;
+      return <ArtistsTab results={results} />;
     case "Albums":
-      return <AlbumsTab results={results.albums} />;
+      return <AlbumsTab results={results} />;
     default:
       return <></>;
   }
@@ -40,29 +41,40 @@ const SearchResultsComponent = () => {
 
   const tabs = ["All", "Songs", "Artists", "Albums", "Lyrics"];
   const [activeTab, setActiveTab] = useState<string>(selectedTab);
+  const activeTabPage = paginatorStore(
+    (state: PaginatorStoreProps) => state.activePage
+  );
+  const setActiveTabPage = paginatorStore(
+    (state: PaginatorStoreProps) => state.setActivePage
+  );
 
   const { query, setQuery, results, loading } = useApiSearch();
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
-    router.push(`/search?q=${query}&tab=${tab}`);
+    setActiveTabPage(1);
+    router.push(`/search?q=${query}&tab=${tab}&page=${activeTabPage}`);
   };
+
+  useEffect(() => {
+    router.push(`/search?q=${query}&tab=${activeTab}&page=${activeTabPage}`);
+  }, [activeTabPage]);
 
   useEffect(() => {
     if (searchParams.get("tab")) {
       handleTabChange(searchParams.get("tab") || "All");
     }
-  }, [searchParams]);
-
-  useEffect(() => {
     if (searchParams.get("q")) {
       setQuery(searchParams.get("q") || "");
+    }
+    if (searchParams.get("page")) {
+      setActiveTabPage(Number(searchParams.get("page") || 1));
     }
   }, [searchParams]);
 
   useEffect(() => {
     if (query) {
-      router.push(`/search?q=${query}&tab=${activeTab}`);
+      router.push(`/search?q=${query}&tab=${activeTab}&page=${activeTabPage}`);
     }
   }, [query]);
 
@@ -70,9 +82,13 @@ const SearchResultsComponent = () => {
     <div className="flex flex-col items-center gap-4">
       <div className="lg:w-[80%] mx-auto text-white">
         {/* search results bar */}
-        <div className="w-full flex flex-col lg:flex-row justify-start gap-12">
+        <div className="w-full flex flex-col lg:flex-row justify-start gap-6">
           {/* Search settings */}
-          <div className="px-5 flex flex-col gap-2">
+          <div className="w-full flex flex-col gap-2 max-w-[650px]">
+            {/* Search form input */}
+            <div className="w-full">
+              <SearchBar searchInput={query} setSearchInput={setQuery} />
+            </div>
             <h1 className="text-2xl font-bold">
               Search results for:{" "}
               <span className="text-[#ffb74d]">{query}</span>
@@ -94,10 +110,10 @@ const SearchResultsComponent = () => {
               ))}
             </div>
           </div>
-          {/* Search form input */}
-          <div className="w-full max-w-[600px]">
-            <SearchBar searchInput={query} setSearchInput={setQuery} />
-          </div>
+          {/* player controls */}
+          {/* <div className="w-full h-full ">
+            
+          </div> */}
         </div>
         {/* /search bar */}
         {/* Search results */}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import convertRuntime from "@/utils/song/runtime";
 import useAudioPlayback from "@/utils/song/playback";
 import { FaPlay, FaPause } from "react-icons/fa6";
+import { playerStore } from "../common/PlayerControls";
 
 const SongCard = ({
   song,
@@ -13,7 +14,13 @@ const SongCard = ({
   inline?: boolean;
 }) => {
   const runtime = convertRuntime(Number(song.runtime));
-  const { isPlaying, togglePlaying } = useAudioPlayback(song);
+  // const { isPlaying, togglePlaying } = useAudioPlayback(song);
+  const isPlaying = playerStore((state) => state.isPlaying);
+  const togglePlaying = playerStore((state) => state.togglePlaying);
+  const setSong = playerStore((state) => state.setCurrentSong);
+  const play = playerStore((state) => state.play);
+  const pause = playerStore((state) => state.pause);
+  const currentSong = playerStore((state) => state.currentSong);
 
   // inline card
   if (true) {
@@ -27,23 +34,28 @@ const SongCard = ({
         {/* song Cover + play button */}
         <div className="relative my-auto w-20 mr-4">
           <img
-            src={song.albumCover}
+            src={song.albumCover || "/images/placeholder.png"}
             onError={(e) => {
               e.currentTarget.src = "/images/placeholder.png";
             }}
-            alt={song.title}
+            alt={song.title.slice(0, 10)}
             className="rounded-md"
           />
           {/* hoverable play button */}
           <button
             className="w-full h-full absolute top-0 left-0 flex items-center justify-center bg-black/75 rounded-md p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
             onClick={(e) => {
-              e.stopPropagation();
+              // e.stopPropagation();
               e.preventDefault();
-              togglePlaying();
+
+              if (currentSong?.id !== song.id) {
+                setSong(song);
+              } else {
+                togglePlaying();
+              }
             }}
           >
-            {isPlaying ? (
+            {isPlaying && currentSong?.id === song.id ? (
               <FaPause className="text-white text-2xl" />
             ) : (
               <FaPlay className="text-white text-2xl" />

@@ -1,10 +1,7 @@
+import { Album } from "../types/album";
 import { ALBUMS_URL } from "./const";
 
-const getAlbum = async (album_id: string) => {
-  const albums = await fetch(ALBUMS_URL + `/${album_id}`).then((res) =>
-    res.json()
-  );
-  return albums;
-};
+const getAlbum = async (album_id: string): Promise<Response> =>
+  fetch(ALBUMS_URL + `/${album_id}`);
 
 export default getAlbum;
