@@ -29,13 +29,6 @@ class Index:
             single = True
 
         for track_id in track_ids:
-            # # Safety check - ensure track_id is hashable
-            # if isinstance(track_id, pd.Series) or isinstance(track_id, pd.DataFrame):
-            #     if len(track_id) > 0:
-            #         track_id = track_id.iloc[0]  # Take first value if Series
-            #     else:
-            #         continue  # Skip empty Series
-    
             if track_id not in track_data.index:
                 continue
 
