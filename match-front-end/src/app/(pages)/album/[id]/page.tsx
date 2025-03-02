@@ -13,11 +13,11 @@ const fetchAlbum = async (id: string): Promise<Album | undefined> => {
   return response.json();
 };
 
-const AlbumPage = async ({
-  params,
-}: {
-  params: Promise<{ id: string }> | { id: string };
-}) => {
+interface AlbumPageProps {
+  params: Promise<{ id: string }>;
+}
+
+const AlbumPage = async ({ params }: AlbumPageProps) => {
   const album = await fetchAlbum((await params).id);
 
   if (!album) {

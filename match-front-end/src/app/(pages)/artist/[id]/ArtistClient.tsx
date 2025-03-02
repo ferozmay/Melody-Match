@@ -4,7 +4,7 @@ import SongsTab from "@/components/search/tabs/SongsTab";
 import { Album } from "@/utils/types/album";
 import { Artist } from "@/utils/types/artist";
 import { Song } from "@/utils/types/song";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 type ArtistTabData = {

@@ -1,7 +1,6 @@
 import SongCard from "@/components/cards/SongCard";
 import Paginator from "@/components/common/Paginator";
 import { SearchResults } from "@/utils/types/searchResults";
-import { Song } from "@/utils/types/song";
 import React from "react";
 
 interface SongsTabProps {

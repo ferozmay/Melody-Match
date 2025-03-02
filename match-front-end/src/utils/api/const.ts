@@ -1,6 +1,6 @@
 // export const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-// export const BACKEND_URL = "https://melody.dvstr.net";
-export const BACKEND_URL = "http://localhost:5000";
+export const BACKEND_URL = "https://melody.dvstr.net";
+// export const BACKEND_URL = "http://localhost:5000";
 export const API_URL = `${BACKEND_URL}/api`;
 // export const AUDIO_URL = `${BACKEND_URL}/audio`;
 export const AUDIO_URL = `https://melody.dvstr.net/audio`;

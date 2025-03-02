@@ -44,12 +44,10 @@ export const playerStore = create<PlayerStoreProps>((set, get) => ({
   updateTime: () => {
     const { audio, youtubeRef, youtubeID } = get();
     if (youtubeRef && youtubeID) {
+      // @ts-ignore
       set({ currentTime: youtubeRef.getCurrentTime() || 0 });
+      // @ts-ignore
       set({ duration: youtubeRef.getDuration() || 0 });
-      //   youtubeRef.getCurrentTime().then((time) => {
-      //   });
-      //   youtubeRef.getDuration().then((time) => {
-      //   });
     } else {
       set({ currentTime: audio?.currentTime || 0 });
       set({ duration: audio?.duration || 0 });
@@ -192,8 +190,8 @@ const PlayerControls = () => {
               }, 1000);
             }
           }}
-          onStateChange={(e) => {
-            const state = e.target.getPlayerState();
+          onStateChange={async (e) => {
+            const state = await e.target.getPlayerState();
             if (state === 1) {
               setPlaying(true);
             }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense, act } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/components/input/SearchBar";
 import useApiSearch from "@/utils/api/search";
@@ -53,12 +53,11 @@ const SearchResultsComponent = () => {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     setActiveTabPage(1);
-    router.push(`/search?q=${query}&tab=${tab}&page=${activeTabPage}`);
   };
 
   useEffect(() => {
     router.push(`/search?q=${query}&tab=${activeTab}&page=${activeTabPage}`);
-  }, [activeTabPage]);
+  }, [activeTabPage, query, activeTab]);
 
   useEffect(() => {
     if (searchParams.get("tab")) {

@@ -2,9 +2,9 @@
 import { Song } from "@/utils/types/song";
 import Link from "next/link";
 import convertRuntime from "@/utils/song/runtime";
-import useAudioPlayback from "@/utils/song/playback";
 import { FaPlay, FaPause } from "react-icons/fa6";
 import { playerStore } from "../common/PlayerControls";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 const SongCard = ({
   song,
@@ -18,8 +18,7 @@ const SongCard = ({
   const isPlaying = playerStore((state) => state.isPlaying);
   const togglePlaying = playerStore((state) => state.togglePlaying);
   const setSong = playerStore((state) => state.setCurrentSong);
-  const play = playerStore((state) => state.play);
-  const pause = playerStore((state) => state.pause);
+  const isLoading = playerStore((state) => state.isLoading);
   const currentSong = playerStore((state) => state.currentSong);
 
   // inline card
@@ -55,7 +54,8 @@ const SongCard = ({
               }
             }}
           >
-            {isPlaying && currentSong?.id === song.id ? (
+            {isLoading && currentSong?.id === song.id && <LoadingSpinner />}
+            {!isLoading && isPlaying && currentSong?.id === song.id ? (
               <FaPause className="text-white text-2xl" />
             ) : (
               <FaPlay className="text-white text-2xl" />

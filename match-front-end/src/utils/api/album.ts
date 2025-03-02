@@ -1,4 +1,3 @@
-import { Album } from "../types/album";
 import { ALBUMS_URL } from "./const";
 
 const getAlbum = async (album_id: string): Promise<Response> =>
