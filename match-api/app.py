@@ -7,6 +7,7 @@ from index.index_class import Index
 import pickle, pandas as pd, time
 import threading
 from search_rank import search_rank
+from utils import parse_id
 from utils.preview.youtube import search_youtube_id
 from utils.ids_to_data import track_ids_to_data, album_ids_to_data, artist_ids_to_data
 
@@ -123,11 +124,3 @@ def handle_request():
         'songs': [], 'albums': [], 'artists': [],
         'track_pages': 0, 'album_pages': 0, 'artist_pages': 0
     }
-
-
-
-def parse_id(identifier):
-    try:
-        return int(identifier)
-    except ValueError:
-        return str(identifier)

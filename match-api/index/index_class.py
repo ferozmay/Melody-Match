@@ -1,6 +1,8 @@
 from index.store_load import load_data, store_data
 import numpy as np
 import json
+from utils import parse_id
+import ast
 
 
 similar_songs_dict = {}
@@ -14,6 +16,12 @@ def handle_nan(value):
     if isinstance(value, float) and (value != value): 
         return None
     return value
+
+def is_fma(track_id):
+    _id = parse_id(track_id)
+    if isinstance(_id, int):
+        return True
+    return False
 
 
 class Index:
@@ -42,7 +50,13 @@ class Index:
             track_info = track_data.loc[track_id]
             similar_songs = []
             if include_similar:
-                similar_songs = json.loads(self.track_ids_to_data(self.get_similar_songs(track_id)))
+                if is_fma(track_id):
+                    similar_songs = json.loads(self.track_ids_to_data(self.get_similar_songs(track_id)))
+                else:
+                    items = ast.literal_eval(self.track_data.loc[track_id, ("track", "similars")])
+                    similar_songs = list(items.keys())
+                    similar_songs = json.loads(self.track_ids_to_data(similar_songs))
+                    # similar_songs = self.track_data.loc[track_id][["track", "similars"]]
             
             data.append({
                 "id": track_id,
