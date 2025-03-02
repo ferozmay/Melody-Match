@@ -27,7 +27,7 @@ const SongCard = ({
         {/* song Cover + play button */}
         <div className="relative my-auto w-20 mr-4">
           <img
-            src={song.albumCover}
+            src={song.albumCover || "/images/placeholder.png"}
             onError={(e) => {
               e.currentTarget.src = "/images/placeholder.png";
             }}
@@ -57,7 +57,7 @@ const SongCard = ({
             {song.title}
           </h3>
 
-          <p className="line-clamp-1">{song.artist}</p>
+          <p className="text-gray-200 line-clamp-1">{song.artist}</p>
           <p className="text-gray-400">{runtime}</p>
         </div>
 

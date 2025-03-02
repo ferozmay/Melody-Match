@@ -9,4 +9,5 @@ export type Album = {
   artistLink: string;
   songs: Song[];
   releaseDate: string;
+  genres: string;
 };
