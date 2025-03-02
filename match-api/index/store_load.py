@@ -3,6 +3,7 @@ import pandas as pd
 from index.data_cleaning import clean_and_make_data
 from index.data_processing import process_data
 from index.inverted_index import create_inverted_index
+import json
 
 """This module serves two purpouses:
 1. Loads, preprocesses dataframes, builds inverted index. Saves dfs and the inverted index as binary in the data/stored_data folder.
@@ -48,7 +49,8 @@ def store_data():
         df.to_hdf('data/stored_data/dataframes.h5', key=key , mode='a')
     for df, key in zip(entire_doclengths_dfs, entire_doclengths_df_keys):
         df.to_hdf('data/stored_data/dataframes.h5', key=key , mode='a')
-
+    with open ("data/stored_data/inverted_index.pkl", "wb") as f:
+        pickle.dump(inverted_index, f)
 
 def load_data():
     """Loads the data frames and the inverted index. We only load the necessary ones."""
@@ -57,12 +59,19 @@ def load_data():
     track_data = pd.read_hdf('data/stored_data/dataframes.h5', key='track_data_df')
     album_data = pd.read_hdf('data/stored_data/dataframes.h5', key='album_data_df')
     artist_data = pd.read_hdf('data/stored_data/dataframes.h5', key='artist_data_df')
+    pp_track_data = pd.read_hdf('data/stored_data/dataframes.h5', key='pp_track_data_df')
+    pp_album_data = pd.read_hdf('data/stored_data/dataframes.h5', key='pp_album_data_df')
+    pp_artist_data = pd.read_hdf('data/stored_data/dataframes.h5', key='pp_artist_data_df')
     doclengths_track_data = pd.read_hdf('data/stored_data/dataframes.h5', key='doclengths_track_data_df')
     doclengths_album_data = pd.read_hdf('data/stored_data/dataframes.h5', key='doclengths_album_data_df')
     doclengths_artist_data = pd.read_hdf('data/stored_data/dataframes.h5', key='doclengths_artist_data_df')
+    
     with open("data/stored_data/inverted_index.pkl", "rb") as f:
         inverted_index = pickle.load(f)
-    return track_data, album_data, artist_data, doclengths_track_data, doclengths_album_data, doclengths_artist_data, inverted_index
+    with open("data/stored_data/lyrics_inverted_index.json", 'r') as g:
+        lyrics_index = json.load(g)
+
+    return track_data, album_data, artist_data, doclengths_track_data, doclengths_album_data, doclengths_artist_data, inverted_index, lyrics_index
 
 
 if __name__ == "__main__":

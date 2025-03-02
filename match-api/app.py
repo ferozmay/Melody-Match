@@ -3,7 +3,7 @@ app_start_time = time.time()
 import json
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
-from index.index_search_rank_class import Index
+from index.index_data_ranking import Index
 import pickle, pandas as pd, time
 import threading
 from utils.ids_to_data import track_ids_to_data, album_ids_to_data, artist_ids_to_data

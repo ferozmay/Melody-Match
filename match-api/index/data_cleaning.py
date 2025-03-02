@@ -3,21 +3,15 @@ from index.msd_cleaning import *
 
 """This is a module for cleaning the FMA data. Essentially, it loads the data from fma_metadata folder into data frames. It also adds some columns that would be useful for the data frames
 and fixes any issues for columns that the enry is not usable. In essence it is preparing the data we have gotten from the FMA, so that we can make an inverted index with it and display data on the front end."""
-
-# Move file loading to module level
-GENRE_DATA = pd.read_csv("data/fma_metadata/genres.csv")
-GENRE_LOOKUP = dict(zip(GENRE_DATA["genre_id"], GENRE_DATA["title"]))
-RAW_GENRES = pd.read_csv('data/fma_metadata/raw_genres.csv', index_col=0)
-MSD_TRACK_DATA = pd.read_csv('data/msd_metadata/msd.csv')
-MSD_TRACK_DATA_MULTIINDEX = create_track_data_multiindex(MSD_TRACK_DATA)
-MSD_ALBUM_DATA = create_album_data(MSD_TRACK_DATA_MULTIINDEX)
-MSD_ARTIST_DATA = create_artist_data(MSD_TRACK_DATA_MULTIINDEX)
-MSD_ARTIST_DATA['tags'] = MSD_ARTIST_DATA['tags'].apply(str)
-MSD_ALBUM_DATA['tags'] = MSD_ALBUM_DATA['tags'].apply(str)
+global MSD_TRACK_DATA
+def make_global_variables():
+    global MSD_TRACK_DATA
+    MSD_TRACK_DATA = pd.read_csv('data/msd_metadata/msd.csv')
 
 
 def clean_and_make_data():
     """This function is simply a composition of the main functions in this module, to make it easier to import and run the functions of this module."""
+    make_global_variables()
     track_data = clean_track_data()
     genres_data = clean_genres_data()
     album_data = make_album_data(track_data)
@@ -34,17 +28,19 @@ def clean_track_data():
     
     track_data = pd.read_csv('data/fma_metadata/tracks.csv', index_col=0, header=[0, 1]) # warning: code later relies on the track id being the index
     
-    # msd_data = pd.read_csv('data/msd_metadata/msd.csv')
-    # msd_data = create_track_data_multiindex(msd_data)
+    genre_data = pd.read_csv('data/fma_metadata/genres.csv')
+    genre_lookup = dict(zip(genre_data['genre_id'], genre_data['title']))
 
-    # Use global variables instead of reloading files
-    msd_data = MSD_TRACK_DATA_MULTIINDEX.copy()
-    msd_data[('track', 'tags')] = msd_data[('track', 'tags')].apply(str)
+    global MSD_TRACK_DATA
+    MSD_TRACK_DATA = create_track_data_multiindex(MSD_TRACK_DATA)
+
 
     fma_max_album_id = track_data[('album', 'id')].max()
-    msd_data[('album', 'id')] += fma_max_album_id + 2
-    print(msd_data[('album', 'id')].min(), msd_data[('album', 'id')].max())
-        
+
+    MSD_TRACK_DATA[('album', 'id')] += fma_max_album_id + 2
+
+    print(MSD_TRACK_DATA[('album', 'id')].min(), MSD_TRACK_DATA[('album', 'id')].max())
+
     # load raw tracks
     raw_tracks = pd.read_csv('data/fma_metadata/raw_tracks.csv')
 
@@ -63,8 +59,13 @@ def clean_track_data():
     track_data.drop(nan_track_titles, inplace=True)
 
     # drop msd tracks with no titles
-    msd_nan_track_titles = msd_data[msd_data[("track", "title")].isna()].index
-    msd_data.drop(msd_nan_track_titles, inplace = True)
+    msd_nan_track_titles = MSD_TRACK_DATA[MSD_TRACK_DATA[("track", "title")].isna()].index
+    MSD_TRACK_DATA.drop(msd_nan_track_titles, inplace = True)
+
+    #make a copy of the msd data frame before we filter it
+    msd_data = MSD_TRACK_DATA.copy(deep=True)
+
+    msd_data[('track', 'tags')] = msd_data[('track', 'tags')].apply(str)
 
     # fix image urls
     track_data[("track", "track_image_file")] = track_data.index.map(lambda x: fix_album_cover_url(track_data, x))
@@ -94,7 +95,7 @@ def clean_track_data():
 
     # create a string version of the genres for each track
     # For track_data in clean_track_data()
-    track_data[('track', 'genres_string')] = track_data[('track', 'genres')].apply(lambda x: genre_ids_to_words(list(x.keys()), GENRE_LOOKUP) if isinstance(x, dict) and x else "Unknown")
+    track_data[('track', 'genres_string')] = track_data[('track', 'genres')].apply(lambda x: genre_ids_to_words(list(x.keys()), genre_lookup) if isinstance(x, dict) and x else "Unknown")
     track_data[('track', 'duration')] = track_data[('track', 'duration')].astype(int)
 
     print(track_data.head())
@@ -107,11 +108,9 @@ def clean_genres_data():
     """This function loads the genres.csv and raw_genres.csv files into data frames. Both dfs have similar information, but the raw_genres df has colours for each genre which we may find useful.
     So we merge the two dfs and return the merged df."""
     
-    # genres_data = pd.read_csv('data/fma_metadata/genres.csv', index_col=0)
-    # raw_genres = pd.read_csv('data/fma_metadata/raw_genres.csv', index_col=0)
-    
-    genres_data = GENRE_DATA.copy()
-    raw_genres = RAW_GENRES.copy()
+    genres_data = pd.read_csv('data/fma_metadata/genres.csv', index_col=0)
+    raw_genres = pd.read_csv('data/fma_metadata/raw_genres.csv', index_col=0)
+
     
     # Add genre colors in case we want at some stage
     raw_genres = raw_genres[[("genre_color")]]
@@ -153,11 +152,13 @@ def make_album_data(track_data):
     
     album_data = pd.read_csv('data/fma_metadata/raw_albums.csv')
 
-    # msd_track_data = pd.read_csv('data/msd_metadata/msd.csv')
-    # msd_track_data = create_track_data_multiindex(msd_track_data)
-    # msd_album_data = create_album_data(msd_track_data)
+    global MSD_TRACK_DATA
+    msd_track_data = MSD_TRACK_DATA.copy(deep=True)
+    msd_album_data = create_album_data(msd_track_data)
 
-    msd_album_data = MSD_ALBUM_DATA.copy()
+    genre_data = pd.read_csv('data/fma_metadata/genres.csv')
+    genre_lookup = dict(zip(genre_data['genre_id'], genre_data['title']))
+
     msd_album_data['tags'] = msd_album_data['tags'].apply(str)
 
     # add a flag to check which dataset the album came from 
@@ -209,10 +210,13 @@ def make_album_data(track_data):
 
     # create new column containing the genres of the album as a string
     album_data['album_genres_string'] = album_data['album_genres'].apply(
-        lambda x: genre_ids_to_words(list(x.keys()), GENRE_LOOKUP) if isinstance(x, dict) and x else "Unknown")
+        lambda x: genre_ids_to_words(list(x.keys()), genre_lookup) if isinstance(x, dict) and x else "Unknown")
 
     # resetting the index to be the album id (this bit is optional and should be changed if causing problems)
     album_data.set_index('album_id', inplace=True)
+
+    # drop rows where track_ids is NaN
+    album_data = album_data[album_data['track_ids'].notna()]
 
     print(album_data.head())
     print(album_data.tail())
@@ -228,13 +232,13 @@ def make_artist_data(track_data):
 
     artist_data = pd.read_csv('data/fma_metadata/raw_artists.csv')
 
-    # msd_track_data = pd.read_csv('data/msd_metadata/msd.csv')
-    # msd_track_data = create_track_data_multiindex(msd_track_data)
-    # msd_artist_data = create_artist_data(msd_track_data)
-    # msd_artist_data['tags'] = msd_artist_data['tags'].apply(str)
-
-    msd_artist_data = MSD_ARTIST_DATA.copy()
+    global MSD_TRACK_DATA
+    msd_track_data = MSD_TRACK_DATA.copy(deep=True)
+    msd_artist_data = create_artist_data(msd_track_data)
     msd_artist_data['tags'] = msd_artist_data['tags'].apply(str)
+
+    genre_data = pd.read_csv('data/fma_metadata/genres.csv')
+    genre_lookup = dict(zip(genre_data['genre_id'], genre_data['title']))
 
     # add a flag to check which dataset the album came from 
     artist_data['artist_dataset'] = 'fma'
@@ -285,13 +289,17 @@ def make_artist_data(track_data):
 
     # create new column containing the genres of the artist as a string
     artist_data['artist_genres_string'] = artist_data['artist_genres'].apply(
-        lambda x: genre_ids_to_words(list(x.keys()), GENRE_LOOKUP) if isinstance(x, dict) and x else "Unknown")
+        lambda x: genre_ids_to_words(list(x.keys()), genre_lookup) if isinstance(x, dict) and x else "Unknown")
     
     # resetting the index to be the artist id (optional)
     artist_data.set_index('artist_id', inplace=True)
     
     # fix image urls
     artist_data[("artist_image_file")] = artist_data.index.map(lambda x: fix_artist_image_url(artist_data, x))
+
+
+    # drop rows where track_ids or album_ids is NaN
+    artist_data = artist_data[artist_data['track_ids'].notna() & artist_data['album_ids'].notna()]
 
     print(artist_data.head())
     print(artist_data.tail())
