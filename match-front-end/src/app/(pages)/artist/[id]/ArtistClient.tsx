@@ -22,9 +22,31 @@ const TabSelector = ({
   if (!("songs" in data)) return <></>;
   switch (activeTab) {
     case "Songs":
-      return <SongsTab results={data} />;
+      return (
+        <SongsTab
+          results={{
+            songs: data.songs,
+            artists: [],
+            albums: [],
+            track_pages: 0,
+            artist_pages: 0,
+            album_pages: 0,
+          }}
+        />
+      );
     case "Albums":
-      return <AlbumsTab results={data} />;
+      return (
+        <AlbumsTab
+          results={{
+            songs: [],
+            artists: [],
+            albums: data.albums,
+            track_pages: 0,
+            artist_pages: 0,
+            album_pages: 0,
+          }}
+        />
+      );
     default:
       return <></>;
   }
