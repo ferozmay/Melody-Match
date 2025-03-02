@@ -3,10 +3,9 @@ app_start_time = time.time()
 import json
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
-from index.index_class import Index
+from index.index_search_rank_class import Index
 import pickle, pandas as pd, time
 import threading
-from search_rank import search_rank
 from utils.ids_to_data import track_ids_to_data, album_ids_to_data, artist_ids_to_data
 
 # init the app
@@ -52,10 +51,12 @@ def handle_request():
     limit = int(request.args.get("limit", 10))
 
     if query:
-        collection_size = len(index.track_data)  # total number of tracks
-        # these hyperparamters are reported to be sensible for BM25 algorithm, but we can evaluate different settings for our use case 
-        hyperparams = {'k':1.2, 'b':0.75}
-        track_scores, album_scores, artist_scores = search_rank(query, index.index, index.doclengths_track_data, index.doclengths_album_data, index.doclengths_artist_data,  collection_size, hyperparams)
+          # total number of tracks
+        # the hyperparamters k,b are reported to be sensible for BM25 algorithm, but we can evaluate different settings for our use case 
+        # we can also evaluate the effect of the hyperparameters alpha, beta, gamma which are used for instances where an artists songs should show in the songs section
+        hyperparams = {'k':1.2, 'b':0.75, 'alpha':1, 'beta':1, 'gamma':1}
+        index.load_hyperparameters(hyperparams)
+        track_scores, album_scores, artist_scores = index.search_rank(query)
         
 
 
