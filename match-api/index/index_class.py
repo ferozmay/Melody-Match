@@ -1,7 +1,18 @@
-from index.store_load import load_data
+from index.store_load import load_data, store_data
 import numpy as np
 import json
+<<<<<<< HEAD
+from utils import parse_id
+import ast
+
+
+similar_songs_dict = {}
+
+with open("data/stored_data/fma_sim_dict.json", "r") as f:
+    similar_songs_dict = json.load(f)
+=======
 import pandas as pd
+>>>>>>> 7c0501d4ada6e57b1628f8fe08fb75d59d63e9a4
 
 
 def handle_nan(value):
@@ -10,10 +21,24 @@ def handle_nan(value):
         return None
     return value
 
+def is_fma(track_id):
+    _id = parse_id(track_id)
+    if isinstance(_id, int):
+        return True
+    return False
+
 
 class Index:
+    def build_index(self):
+        store_data()
+
     def load_index(self):
         self.track_data, self.album_data, self.artist_data, self.doclengths_track_data, self.doclengths_album_data, self.doclengths_artist_data, self.index = load_data()
+    
+    def get_similar_songs(self, song_id):
+        scored_songs = similar_songs_dict.get(str(song_id), [])
+        similar_song_ids = [int(song[0]) for song in scored_songs]
+        return similar_song_ids
 
     def track_ids_to_data(self, track_ids, include_similar=False):
         track_data = self.track_data
@@ -29,16 +54,21 @@ class Index:
             single = True
 
         for track_id in track_ids:
+            # [track_data["flag"] == flag]
             if track_id not in track_data.index:
                 continue
 
             track_info = track_data.loc[track_id]
             similar_songs = []
             if include_similar:
-                similar_songs = json.loads(self.track_ids_to_data(track_data.iloc[:10].index.tolist()))
-
+                if is_fma(track_id):
+                    similar_songs = json.loads(self.track_ids_to_data(self.get_similar_songs(track_id)))
+                else:
+                    items = ast.literal_eval(self.track_data.loc[track_id, ("track", "similars")])
+                    similar_songs = list(items.keys())
+                    similar_songs = json.loads(self.track_ids_to_data(similar_songs))
+                    # similar_songs = self.track_data.loc[track_id][["track", "similars"]]
             genres = track_info[("track", "genres_string")]
-
             data.append({
                 "id": track_id,
                 "title": handle_nan(track_info[("track", "title")]),
@@ -47,6 +77,7 @@ class Index:
                 "albumCover": handle_nan(track_info[("track", "track_image_file")]),
                 "link": handle_nan(track_info[("track", "track_url")]),
                 "artistLink": handle_nan(track_info.get(("track", "artist_url"))),
+                "artistId": handle_nan(track_info.get(("artist", "id"))),
                 "album": handle_nan(track_info[("album", "title")]),
                 "albumLink": handle_nan(track_info.get(("track", "album_url"))),
                 "genres": genres,
@@ -56,7 +87,9 @@ class Index:
             })
         
         if single:
-            return json.dumps(data[0], default=str)
+            if data:
+                return json.dumps(data[0], default=str)
+            return None
         return json.dumps(data, default=str)
 
     def album_ids_to_data(self, album_ids, include_tracks=False):
@@ -95,7 +128,9 @@ class Index:
             })
 
         if single:
-            return json.dumps(data[0], default=str)
+            if data:
+                return json.dumps(data[0], default=str)
+            return None
         return json.dumps(data, default=str)
 
     def artist_ids_to_data(self, artist_ids, include_tracks=False, include_albums=False):
@@ -127,5 +162,7 @@ class Index:
                 "bio": handle_nan(artist_info[("artist_bio")])
             })
         if single:
-            return json.dumps(data[0], default=str)
+            if data:
+                return json.dumps(data[0], default=str)
+            return None
         return json.dumps(data, default=str)

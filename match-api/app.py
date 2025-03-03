@@ -1,11 +1,14 @@
 import time
 app_start_time = time.time()
 import json
-from flask import Flask, request
+from flask import Flask, request, abort
 from flask_cors import CORS, cross_origin
 from index.index_data_ranking import Index
 import pickle, pandas as pd, time
 import threading
+from search_rank import search_rank
+from utils import parse_id
+from utils.preview.youtube import search_youtube_id
 from utils.ids_to_data import track_ids_to_data, album_ids_to_data, artist_ids_to_data
 
 # init the app
@@ -39,20 +42,40 @@ print("App loaded successfully! Time taken: ", app_end_time - app_start_time)
 
 @app.route("/api/songs/<track_id>")
 def get_song(track_id):
-    return index.track_ids_to_data(parse_id(track_id), include_similar=True)
+    track_data = index.track_ids_to_data(parse_id(track_id), include_similar=True)
+    if track_data is None:
+        return abort(404, {"message": "Track not found"})
+    return track_data
+
+@app.route("/api/songs/<track_id>/youtube_id")
+def get_youtube_id(track_id):
+    track_data = index.track_ids_to_data(parse_id(track_id))
+    if track_data is None:
+        return abort(404, {"message": "Track not found"})
+    return {
+        "youtube_id": search_youtube_id(json.loads(track_data))
+    }
 
 @app.route("/api/albums/<album_id>")
 def get_album(album_id):
-    return index.album_ids_to_data(parse_id(album_id), include_tracks=True)
+    album_data = index.album_ids_to_data(parse_id(album_id), include_tracks=True)
+    if album_data is None:
+        return abort(404, {"message": "Album not found"})
+    return album_data
 
 @app.route("/api/artists/<artist_id>")
 def get_artist(artist_id):
-    return index.artist_ids_to_data(parse_id(artist_id), include_albums=True, include_tracks=True)
+    artist_data = index.artist_ids_to_data(parse_id(artist_id), include_albums=True, include_tracks=True)
+    if artist_data is None:
+        return abort(404, {"message": "Artist not found"})
+    return artist_data
     
 @app.route("/api/search")
 def handle_request():
     query = request.args.get("query", None)
+    # pagination limit
     limit = int(request.args.get("limit", 10))
+    page = int(request.args.get("page", 1))
 
     if query:
           # total number of tracks
@@ -82,12 +105,15 @@ def handle_request():
         sorted_track_scores = sorted(track_scores.items(), key=lambda item: sum(list(item[1])), reverse=True)
         sorted_album_scores = sorted(album_scores.items(), key=lambda x: tuple_sum(x[1]), reverse=True)  # Now sort album_scores using the helper function
         sorted_artist_scores = sorted(artist_scores.items(), key=lambda item: sum(list(item[1])), reverse=True)
-
         sorted_lyrics_scores = sorted(lyrics_scores.items(), key=lambda item: item[1], reverse=True)
 
-        ranked_track_ids = [track_id for track_id, _ in sorted_track_scores][:limit] 
-        ranked_album_ids = [album_id for album_id, _ in sorted_album_scores][:limit]
-        ranked_artist_ids = [artist_id for artist_id, _ in sorted_artist_scores][:limit]
+        track_pages = len(sorted_track_scores) // limit + 1 if len(sorted_track_scores) % limit != 0 else 0
+        album_pages = len(sorted_album_scores) // limit + 1 if len(sorted_album_scores) % limit != 0 else 0
+        artist_pages = len(sorted_artist_scores) // limit + 1 if len(sorted_artist_scores) % limit != 0 else 0
+
+        ranked_track_ids = [track_id for track_id, _ in sorted_track_scores][(page-1)*limit:(page)*limit]
+        ranked_album_ids = [album_id for album_id, _ in sorted_album_scores][(page-1)*limit:(page)*limit]
+        ranked_artist_ids = [artist_id for artist_id, _ in sorted_artist_scores][(page-1)*limit:(page)*limit]
 
         ranked_lyric_track_ids = [track_id for track_id, _ in sorted_lyrics_scores][:limit]
 
@@ -105,15 +131,12 @@ def handle_request():
         # print("Artist data results: ", '\n', artist_data)
         # print("Artist scores: ", '\n', sorted_artist_scores)
         print("Lyrics data results: ", '\n', lyrics_data)
-        # print("Lyrics scores: ", '\n', sorted_lyrics_scores)
-        return {'songs': json.loads(track_data), 'albums' : json.loads(album_data), 'artists': json.loads(artist_data)}
+        return {
+            'songs': json.loads(track_data), 'albums' : json.loads(album_data), 'artists': json.loads(artist_data),
+            'track_pages': track_pages, 'album_pages': album_pages, 'artist_pages': artist_pages
+        }
 
-    return {}
-
-
-
-def parse_id(some_id):
-    try:
-        return int(some_id)
-    except ValueError:
-        return str(some_id)
+    return {
+        'songs': [], 'albums': [], 'artists': [],
+        'track_pages': 0, 'album_pages': 0, 'artist_pages': 0
+    }
