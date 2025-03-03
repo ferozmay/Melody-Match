@@ -44,7 +44,7 @@ def read_lyrics(lyrics_train_path, lyrics_test_path):
     # Convert the indexes into words
     lyrics_word_dict = {track_id: {index_to_word[int(id)]: int(freq) for id, freq in word_dict.items()} for track_id, word_dict in lyrics_dict_idx.items()}
 
-    return lyrics_word_dict, set(all_words)
+    return lyrics_word_dict, all_words
 
 def create_lyrics_similarity_dict(all_words, embeddings, save_path='lyrics_similarity_dict.json', batch_size=100):
     '''

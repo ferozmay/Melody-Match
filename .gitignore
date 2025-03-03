@@ -51,7 +51,7 @@ match-api/inverted-index.json
 # Lyrics query expansion
 !match-api/data/lyrics_similarity_dict.pkl # keep this file
 match-api/models/
-
+lyrics_research/data
 
 # virtual environments
 venv/
