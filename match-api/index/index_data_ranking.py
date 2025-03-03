@@ -17,9 +17,11 @@ def handle_nan(value):
 class Index:
     def load_index(self):
         self.track_data, self.album_data, self.artist_data, self.doclengths_track_data, self.doclengths_album_data, self.doclengths_artist_data, self.index, self.lyrics_index = load_data()
-    def load_hyperparameters(self, hyperparams: dict):
+    
+    def load_parameters(self, hyperparams: dict, ranking_algs: dict):
         self.hyperparams = hyperparams
         self.N = len(self.track_data)
+        self.ranking_algs = ranking_algs
 
     def initialise_scores_dict(self):
         self.track_title_scores = dict()
@@ -31,6 +33,9 @@ class Index:
         self.track_tags_scores = dict()
         self.album_tags_scores = dict()
         self.artist_tags_scores = dict()
+    
+    def initialise_lyrics_scores_dict(self):
+        self.track_lyrics_scores = dict()
         
     def search_rank(self, query: str):
         """This function takes in a query, the index, teh various document lengths dfs and the collection size and hyperparameters for the search.
@@ -88,18 +93,15 @@ class Index:
         artist_keys = set(self.artist_title_scores.keys()) | set(self.artist_genres_scores.keys()) | set(self.artist_tags_scores.keys())
         artist_scores = {doc_id: (self.artist_title_scores.get(doc_id, 0), self.artist_genres_scores.get(doc_id, 0),  self.artist_tags_scores.get(doc_id, 0)) for doc_id in artist_keys}
         
-        # Sort artist scores and get the top 5
-        top_artists = sorted(artist_scores.items(), key=lambda x: sum(x[1]), reverse=True)[:5]
-        print("Top 5 artists with the highest scores are:", top_artists)
-        # print("Track scores are:", artist_scores.items())
-        # print("Album scores are:", artist_scores.items())
+        
         return track_scores, album_scores, artist_scores
 
     def rank_track_titles(self, term , object_type): # include parameter to allow search for albums, aritsts for tracks and artists for albums
         """This function calculate the BM25 score for a term in the index, for a specific object type (track, artist, album) and the 'Name' document type.
         It takes in the doclengths_df and then gets the average length for the document type, and the length of each document that contains the term.
         It then adds the BM25 score to the entry on the socres dicitonary that corresponds to the document id. It returns the scores dictionary, to be used in another iteration."""
-        
+        ranking_alg = self.ranking_algs['names']
+
         # we form the name of the column we are interested in, in the doclengths df - eg track_name
         doclengths_column = ('_'.join([object_type.lower(), 'name']))
 
@@ -125,7 +127,10 @@ class Index:
                 continue
             
             # add the bm25 score for the term, document pair
-            self.track_title_scores[doc_id] += self.calculate_bm25(tf, df, doc_length, doclengths_avg)
+            if ranking_alg == 'BM25':
+                self.track_title_scores[doc_id] += self.calculate_bm25(tf, df, doc_length, doclengths_avg)
+            elif ranking_alg == 'TFIDF':
+                self.track_title_scores[doc_id] += self.calculate_tfidf(tf, df)
 
 
     def rank_album_titles(self, term, object_type): # include parameter to allow search for albums, aritsts for tracks and artists for albums
@@ -133,6 +138,7 @@ class Index:
         It takes in the doclengths_df and then gets the average length for the document type, and the length of each document that contains the term.
         It then adds the BM25 score to the entry on the socres dicitonary that corresponds to the document id. It returns the scores dictionary, to be used in another iteration."""
         gamma = self.hyperparams['gamma']
+        ranking_alg = self.ranking_algs['names']
         
         # we form the name of the column we are interested in, in the doclengths df - eg track_name
         doclengths_column = ('_'.join([object_type.lower(), 'name']))
@@ -159,18 +165,23 @@ class Index:
             if tf == 0 or df == 0:
                 continue
             
+
             # add the bm25 score for the term, document pair
-            album_bm25 = self.calculate_bm25(tf, df, doc_length, doclengths_avg)
-            self.album_title_scores[doc_id] += album_bm25
+            if ranking_alg == 'BM25':
+                album_score = self.calculate_bm25(tf, df, doc_length, doclengths_avg)
+                self.album_title_scores[doc_id] += album_score
+            elif ranking_alg == 'TFIDF':
+                album_score = self.calculate_tfidf(tf, df)
+                self.album_title_scores[doc_id] += album_score
 
             # get the track ids
             trackid_list = self.album_data.loc[doc_id]['track_ids']
             # add a score proportinal to the aritst scores for all the trakc ids that an artist has
             for track_id in trackid_list:
                 if track_id not in self.track_title_scores.keys():
-                    self.track_title_scores[track_id] = album_bm25 * gamma
+                    self.track_title_scores[track_id] = album_score * gamma
                 else:
-                    self.track_title_scores[track_id] += album_bm25 * gamma
+                    self.track_title_scores[track_id] += album_score * gamma
         
 
     def rank_artist_titles(self, term, object_type): # include parameter to allow search for albums, aritsts for tracks and artists for albums
@@ -179,6 +190,7 @@ class Index:
         It then adds the BM25 score to the entry on the socres dicitonary that corresponds to the document id. It returns the scores dictionary, to be used in another iteration."""
         alpha = self.hyperparams['alpha']
         beta = self.hyperparams['beta']
+        ranking_alg = self.ranking_algs['names']
         # we form the name of the column we are interested in, in the doclengths df - eg track_name
         doclengths_column = ('_'.join([object_type.lower(), 'name']))
 
@@ -203,31 +215,36 @@ class Index:
             if tf == 0 or df == 0:
                 continue
             
-            # add the bm25 score for the term, document pair
-            artist_bm25 = self.calculate_bm25(tf, df, doc_length, doclengths_avg)
-            self.artist_title_scores[doc_id] += artist_bm25
+            if ranking_alg == 'BM25':
+                # add the bm25 score for the term, document pair
+                artist_score = self.calculate_bm25(tf, df, doc_length, doclengths_avg)
+                self.artist_title_scores[doc_id] += artist_score
+            elif ranking_alg == 'TFIDF':
+                artist_score = self.calculate_tfidf(tf, df)
+                self.artist_title_scores[doc_id] += artist_score
 
             # get the track ids
             trackid_list = self.artist_data.loc[doc_id]['track_ids']
 
             for track_id in trackid_list:
                 if track_id not in self.track_title_scores.keys():
-                    self.track_title_scores[track_id] = artist_bm25 * alpha
+                    self.track_title_scores[track_id] = artist_score * alpha
                 else:
-                    self.track_title_scores[track_id] += artist_bm25 * alpha
+                    self.track_title_scores[track_id] += artist_score * alpha
             
             # get the album ids
             albumid_list = self.artist_data.loc[doc_id]['album_ids']
 
             for album_id in albumid_list:
                 if album_id not in self.album_title_scores.keys():
-                    self.album_title_scores[album_id] = artist_bm25 * beta
+                    self.album_title_scores[album_id] = artist_score * beta
                 else:
-                    self.album_title_scores[album_id] += artist_bm25 * beta
+                    self.album_title_scores[album_id] += artist_score * beta
 
 
     def rank_genres(self, term , object_type, doclengths_df, scores:dict):
         """This function calculates the BM25 score like in rank_titles, the only difference is that the genres dictionaries are handled differently."""
+        ranking_alg = self.ranking_algs['genres']
 
         doclengths_column = ('_'.join([object_type.lower(), 'genres']))
         doclengths_avg = doclengths_df[doclengths_column]['avg']
@@ -246,9 +263,13 @@ class Index:
             # skip if tf or df are zero to prevent math errors
             if tf == 0 or df == 0:
                 continue
+            
+            if ranking_alg == 'BM25':
+                # add the bm25 score for the term, document pair
+                scores[doc_id] += self.calculate_bm25(tf, df, doc_length, doclengths_avg)
+            elif ranking_alg == 'TFIDF':
+                scores[doc_id] += self.calculate_tfidf(tf,df)
 
-            # add the tfidf weight
-            scores[doc_id] += self.calculate_bm25(tf, df, doc_length, doclengths_avg)
 
     def rank_tags(self, term , object_type, doclengths_df, scores:dict):
         """This function is liek the two before it just it deals with tags. The only difference is that for the moment we set tf = 1 since the tags for a track, artist or album
@@ -273,13 +294,52 @@ class Index:
                 continue
 
             # add the tfidf weight
-            scores[doc_id] += (1 + math.log10(tf)) * math.log10(self.N / df)
+            scores[doc_id] += self.calculate_tfidf(tf, df)
 
 
+    def search_rank_lyrics(self, query:str):
+        query_tokens = process_text(query).split()
+        self.initialise_lyrics_scores_dict()
+        for term in query_tokens:
+            if term in self.lyrics_index:
+                self.rank_lyrics(term)
+            else:
+                continue
+        
+        return self.track_lyrics_scores
+
+
+    
     def rank_lyrics(self, term):
-        
-        msd_doc_ids = self.lyrics_index[term].k
-        
+        """This function calculates the score for a song base don the bag of words representation of a song by its lyrics"""
+        ranking_alg = self.ranking_algs['lyrics']
+        msd_doc_ids = self.lyrics_index[term].keys()
+        df = len(msd_doc_ids)
+        for doc_id in msd_doc_ids: 
+            if doc_id not in self.track_lyrics_scores.keys():
+                    self.track_lyrics_scores[doc_id] = 0
+            tf = self.lyrics_index[term][doc_id]
+            
+            if tf == 0 or df == 0:
+                continue
+            # if ranking_alg == 'BM25':
+            #   self.track_lyrics_scores[doc_id] += self.calculate_bm25 --INSERT BM25 LYRICS CALCULATION HERE
+            elif ranking_alg == 'TFIDF':
+                self.track_lyrics_scores[doc_id] += self.calculate_tfidf(tf, df)
+            
+
+
+    def calculate_tfidf(self, tf, df):
+       """This function calculates the tfidf score for a term in a document. It uses the formula:
+          tfidf(t,d) = tf(t,d) * log(N / df(t))
+          where:
+          tf(t,d) = frequency of term t in document d
+          df(t) = number of docs containing term t
+          N = total number of docs in collection
+       """
+       return (1 + math.log10(tf)) * math.log10(self.N / df)
+
+
 
 
     def calculate_bm25(self, tf, df, doclength, doclengths_avg):
