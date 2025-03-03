@@ -10,6 +10,6 @@ export type Song = {
   album: string;
   albumId: number;
   albumLink: string;
-  topGenre: string;
+  genres: string;
   similarSongs?: Song[];
 };

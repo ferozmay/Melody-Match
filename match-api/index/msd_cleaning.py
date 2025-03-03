@@ -132,8 +132,8 @@ def create_track_data_multiindex(df):
         df.at[index, ('track', 'tags')] = new_tags
         df.at[index, ('track', 'genres')] = new_genres
 
-    # Function to process tags and update genres
 
+    # Function to process tags and update genres
     def update_genres(row):
         if not row[("track", "genres")]:  # Only process if genres column is empty list []
             if not row[("track", "tags")]:
@@ -191,6 +191,9 @@ def create_track_data_multiindex(df):
     base_url = "https://open.spotify.com/search/"
     df[("track", "track_url")] = base_url + df[("track", "title")]
 
+
+    df[('track', 'dataset')] = 'msd'
+
     return df
 
 
@@ -210,6 +213,7 @@ def create_album_data(df):
         album_tracks=('track_id', 'count'),       # Count the number of tracks
         track_ids=('track_id', list),             # List the track_ids
         artist_name=('artist_name', 'first'),
+        artist_id=('artist_id', 'first'),
         album_date_released=('track_year', 'first'),
         tags=('track_tags', lambda x: list(
             set([item for sublist in x for item in sublist])))
@@ -220,6 +224,9 @@ def create_album_data(df):
 
     base_url = "https://open.spotify.com/search/"
     album_df['album_url'] = base_url + album_df['album_title']
+
+
+    album_df['album_dataset'] = 'msd'
 
     return album_df
 
@@ -265,6 +272,8 @@ def create_artist_data(df):
 
     base_url = "https://open.spotify.com/search/"
     artist_df['artist_url'] = base_url + artist_df['artist_name']
+
+    artist_df['artist_dataset'] = 'msd'
 
     return artist_df
 

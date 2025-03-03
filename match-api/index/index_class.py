@@ -1,6 +1,7 @@
 from index.store_load import load_data, store_data
 import numpy as np
 import json
+<<<<<<< HEAD
 from utils import parse_id
 import ast
 
@@ -9,6 +10,9 @@ similar_songs_dict = {}
 
 with open("data/stored_data/fma_sim_dict.json", "r") as f:
     similar_songs_dict = json.load(f)
+=======
+import pandas as pd
+>>>>>>> 7c0501d4ada6e57b1628f8fe08fb75d59d63e9a4
 
 
 def handle_nan(value):
@@ -40,13 +44,20 @@ class Index:
         track_data = self.track_data
         data = []
         single = False
+
+        # First ensure we have scalar values
+        if isinstance(track_ids, pd.Series):
+            track_ids = track_ids.tolist()  # Convert Series to list
+            
         if not isinstance(track_ids, list):
             track_ids = [track_ids]
             single = True
+
         for track_id in track_ids:
             # [track_data["flag"] == flag]
             if track_id not in track_data.index:
                 continue
+
             track_info = track_data.loc[track_id]
             similar_songs = []
             if include_similar:
@@ -57,7 +68,7 @@ class Index:
                     similar_songs = list(items.keys())
                     similar_songs = json.loads(self.track_ids_to_data(similar_songs))
                     # similar_songs = self.track_data.loc[track_id][["track", "similars"]]
-            
+            genres = track_info[("track", "genres_string")]
             data.append({
                 "id": track_id,
                 "title": handle_nan(track_info[("track", "title")]),
@@ -69,8 +80,9 @@ class Index:
                 "artistId": handle_nan(track_info.get(("artist", "id"))),
                 "album": handle_nan(track_info[("album", "title")]),
                 "albumLink": handle_nan(track_info.get(("track", "album_url"))),
-                "albumId": handle_nan(track_info.get(("album", "id"))),
-                "topGenre": handle_nan(track_info.get(("track", "genre_top"))),
+                "genres": genres,
+                "albumId": handle_nan(track_info[("album", "id")]),
+                "artistId": handle_nan(track_info[("artist", "id")]),
                 "similarSongs": similar_songs
             })
         
@@ -94,9 +106,15 @@ class Index:
             album_info = album_data.loc[album_id]
             album_tracks = []
             if include_tracks:
-                album_tracks = json.loads(
-                    self.track_ids_to_data(album_info[("track_ids")]))
-
+                album_tracks = json.loads(self.track_ids_to_data(album_info[("track_ids")]))
+            
+            # # turn album gernres dictionary (id: frequency) into a list of genre ids
+            # album_genres = album_info[("album_genres")]
+            # album_genres = [genre_id for genre_id, _ in album_genres.items()]
+            # # turn genre ids into genre names
+            # album_info["album_genres"] = self.genre_ids_to_words(album_genres)
+            
+            
             data.append({
                 "id": album_id,
                 "title": handle_nan(album_info[("album_title")]),
@@ -105,7 +123,8 @@ class Index:
                 "albumCover": handle_nan(album_info[("album_image_file")]),
                 "noOfTracks": handle_nan(album_info[("album_tracks")]),
                 "link": handle_nan(album_info[("album_url")]),
-                "songs": album_tracks
+                "genres:": album_info["album_genres_string"],
+                "songs": album_tracks,
             })
 
         if single:
@@ -139,7 +158,8 @@ class Index:
                 "artistImage": handle_nan(artist_info[("artist_image_file")]),
                 "link": handle_nan(artist_info[("artist_url")]),
                 "songs": songs,
-                "albums": albums
+                "albums": albums,
+                "bio": handle_nan(artist_info[("artist_bio")])
             })
         if single:
             if data:
