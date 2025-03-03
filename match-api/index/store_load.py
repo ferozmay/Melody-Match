@@ -59,17 +59,14 @@ def load_data():
     track_data = pd.read_hdf('data/stored_data/dataframes.h5', key='track_data_df')
     album_data = pd.read_hdf('data/stored_data/dataframes.h5', key='album_data_df')
     artist_data = pd.read_hdf('data/stored_data/dataframes.h5', key='artist_data_df')
-    pp_track_data = pd.read_hdf('data/stored_data/dataframes.h5', key='pp_track_data_df')
-    pp_album_data = pd.read_hdf('data/stored_data/dataframes.h5', key='pp_album_data_df')
-    pp_artist_data = pd.read_hdf('data/stored_data/dataframes.h5', key='pp_artist_data_df')
     doclengths_track_data = pd.read_hdf('data/stored_data/dataframes.h5', key='doclengths_track_data_df')
     doclengths_album_data = pd.read_hdf('data/stored_data/dataframes.h5', key='doclengths_album_data_df')
     doclengths_artist_data = pd.read_hdf('data/stored_data/dataframes.h5', key='doclengths_artist_data_df')
     
     with open("data/stored_data/inverted_index.pkl", "rb") as f:
         inverted_index = pickle.load(f)
-    with open("data/stored_data/lyrics_inverted_index.json", 'r') as g:
-        lyrics_index = json.load(g)
+    with open("data/stored_data/lyrics_inverted_word.pkl", "rb") as g:
+        lyrics_index = pickle.load(g)
 
     return track_data, album_data, artist_data, doclengths_track_data, doclengths_album_data, doclengths_artist_data, inverted_index, lyrics_index
 
