@@ -14,8 +14,9 @@ from tqdm import tqdm
 import fasttext
 import fasttext.util
 import pickle
-import stemmer
+import Stemmer
 
+stemmer = Stemmer.Stemmer("english")
 
 def normalize(collection: List[str]) -> List[str]:
     '''Copied from utils.text_processing'''
@@ -45,7 +46,7 @@ def read_lyrics(lyrics_train_path, lyrics_test_path):
 
     return lyrics_dict, all_words
 
-def make_inverted_index(lyrics_word_dict: dict) -> dict:
+def make_inverted_index(lyrics_word_dict: dict, all_words) -> dict:
     '''
     Input: {track_id: {word: count}}
     Output: {word: {track_id: count}}
@@ -137,14 +138,10 @@ if __name__ == '__main__':
     lyrics_dict_word = {track_id: {index_to_word[int(id)]: int(freq) for id, freq in word_dict.items()} for track_id, word_dict in lyrics_dict_idx.items()}
 
     # Make inverted index
-    inverted_index = make_inverted_index(lyrics_dict_word)
+    inverted_index = make_inverted_index(lyrics_dict_word, all_words)
 
     # Save the inverted index
     save_lyrics_inverted_index(inverted_index)
-
-    # Load the data
-    # with open(lyrics_inverted_index_path, 'rb') as file:
-    #     inverted_index = pickle.load(file)
 
     make_fasttext_model = False
     if make_fasttext_model:
