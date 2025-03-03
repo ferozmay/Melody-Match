@@ -6,20 +6,25 @@ Lyrics in BOW format can be downloaded from here:
 train_file: http://millionsongdataset.com/sites/default/files/AdditionalFiles/mxm_dataset_train.txt.zip
 test_file: http://millionsongdataset.com/sites/default/files/AdditionalFiles/mxm_dataset_test.txt.zip
 '''
+
+from typing import List
 import json
 import os
 from tqdm import tqdm
-from utils.text_processing import normalize
 import fasttext
 import fasttext.util
 import pickle
+import stemmer
 
+
+def normalize(collection: List[str]) -> List[str]:
+    '''Copied from utils.text_processing'''
+    return stemmer.stemWords(collection)
 
 def read_lyrics(lyrics_train_path, lyrics_test_path):
     '''
     Combine the lyrics from the train and test files into a dictionary
-    
-    Returns: a dictionary with the format {'word': {'track_id': counts}} 
+    Returns: a dictionary with the format {'word_idx': {'track_id': counts}} 
     '''
     lyrics_dict = {}
 
@@ -38,13 +43,30 @@ def read_lyrics(lyrics_train_path, lyrics_test_path):
                     word_dict = {int(id): int(freq) for id_freq in line[2:] for id, freq in [id_freq.split(':')]}
                     lyrics_dict[track_id] = word_dict
 
-    # Make mappings from indices to words, where idx starts at 1
-    index_to_word = {index+1: word for index, word in enumerate(all_words)}
+    return lyrics_dict, all_words
 
-    # Convert the indexes into words
-    lyrics_word_dict = {track_id: {index_to_word[int(id)]: int(freq) for id, freq in word_dict.items()} for track_id, word_dict in lyrics_dict_idx.items()}
+def make_inverted_index(lyrics_word_dict: dict) -> dict:
+    '''
+    Input: {track_id: {word: count}}
+    Output: {word: {track_id: count}}
+    '''
+    # Initialize an empty list for each word in the vocabulary
+    inverted_index = {word: {} for word in all_words}
+    
+    # Iterate over each track and its corresponding word dictionary
+    for track_id, word_dict in lyrics_word_dict.items():
+        # Iterate over each word ID in the word dictionary
+        for word, count in word_dict.items():
+            # Get the word corresponding to the word ID and append the track ID
+            inverted_index[word][track_id] = count
+    
+    return inverted_index
 
-    return lyrics_word_dict, all_words
+def save_lyrics_inverted_index(lyrics_inverted_index, path='data/lyrics_inverted_word.pkl'):
+    with open(path, 'wb') as file:
+        pickle.dump(lyrics_inverted_index, file)
+    print(f"lyrics_inverted_index saved as pickle at {path}")
+
 
 def create_lyrics_similarity_dict(all_words, embeddings, save_path='lyrics_similarity_dict.json', batch_size=100):
     '''
@@ -88,26 +110,53 @@ def create_lyrics_similarity_dict(all_words, embeddings, save_path='lyrics_simil
 
     return lyrics_similarity_dict
 
-# Function to save the lyrics_similarity_dict as a pickle file
 def save_lyrics_similarity_dict(lyrics_similarity_dict, path='data/lyrics_similarity_dict.pkl'):
+    '''Function to save the lyrics_similarity_dict as a pickle file'''
     with open(path, 'wb') as file:
         pickle.dump(lyrics_similarity_dict, file)
     print(f"lyrics_similarity_dict saved as pickle at {path}")
 
-
 if __name__ == '__main__':
 
-    # Load the lyrics
-    lyrics_train_path = 'data/lyrics_train.txt'
-    lyrics_test_path = 'data/lyrics_test.txt'
-    lyrics_word_dict, all_words = read_lyrics(lyrics_train_path, lyrics_test_path)
+    # Input paths
+    lyrics_test_path = 'data/mxm_dataset_test.txt'
+    lyrics_train_path = 'data/mxm_dataset_train.txt'
 
-    # Load the fasttext modelimport fasttext
-    fasttext.util.download_model('en', if_exists='ignore')
-    ft = fasttext.load_model('cc.en.300.bin')
+    # Output
+    lyrics_all_words_path = 'data/lyrics_all_words.txt'
+    lyrics_inverted_index_path = 'data/lyrics_inverted_idx.pkl'
 
-    # Load / create the lyrics similarity dictionary (it is iteratively created as a json so that it can be resumed)
-    lyrics_similarity_dict = create_lyrics_similarity_dict(all_words, ft, save_path='data/lyrics_similarity_dict.json', batch_size=100)
+    # Load the data
+    lyrics_dict_idx, all_words = read_lyrics(lyrics_train_path, lyrics_test_path)
 
-    # Save the lyrics_similarity_dict as a pickle for faster loading
-    save_lyrics_similarity_dict(lyrics_similarity_dict)
+    # Make mappings from words to indices, where idx starts at 1
+    word_to_idx = {word: index+1 for index, word in enumerate(all_words)}
+    index_to_word = {index+1: word for index, word in enumerate(all_words)}
+
+    # Create a dictionary with words instead of indices
+    lyrics_dict_word = {track_id: {index_to_word[int(id)]: int(freq) for id, freq in word_dict.items()} for track_id, word_dict in lyrics_dict_idx.items()}
+
+    # Make inverted index
+    inverted_index = make_inverted_index(lyrics_dict_word)
+
+    # Save the inverted index
+    save_lyrics_inverted_index(inverted_index)
+
+    # Load the data
+    # with open(lyrics_inverted_index_path, 'rb') as file:
+    #     inverted_index = pickle.load(file)
+
+    make_fasttext_model = False
+    if make_fasttext_model:
+        # Load the fasttext modelimport fasttext
+        fasttext.util.download_model('en', if_exists='ignore')
+        ft = fasttext.load_model('cc.en.300.bin')
+
+        # Load / create the lyrics similarity dictionary (it is iteratively created as a json so that it can be resumed)
+        lyrics_similarity_dict = create_lyrics_similarity_dict(all_words, ft, save_path='data/lyrics_similarity_dict.json', batch_size=100)
+
+        # Save the lyrics_similarity_dict as a pickle for faster loading
+        save_lyrics_similarity_dict(lyrics_similarity_dict)
+
+
+
