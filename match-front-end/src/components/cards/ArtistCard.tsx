@@ -9,7 +9,7 @@ const ArtistCard = ({ artist }: { artist: Artist }) => {
       className="cursor-pointer w-full hover:bg-white/10 bg-opacity-10 backdrop-blur-md rounded-lg hover:shadow-lg transition duration-150 p-4 flex flex-col gap-4"
     >
       <img
-        src={artist.artistImage}
+        src={artist.artistImage || "/images/placeholder.png"}
         alt={artist.name}
         className="self-center shadow-lg rounded-full"
         onError={(e) => {
