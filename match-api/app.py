@@ -11,6 +11,10 @@ from utils.ids_to_data import track_ids_to_data, album_ids_to_data, artist_ids_t
 # init the app
 app = Flask(__name__)
 
+@app.errorhandler(Exception)
+def handle_any_exception(e):
+    return {"error": str(e)}, 500
+
 # Set up CORS to prevent blockage of requests from local domains
 cors = CORS(
     app, 
