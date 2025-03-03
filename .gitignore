@@ -61,8 +61,8 @@ similarity_research/models/
 *.mp3
 
 # Lyrics query expansion
-lyrics_search/cc.en.300.bin
-lyrics_search/data
+lyrics_research/cc.en.300.bin
+lyrics_research/data
 
 # virtual environments
 venv/
