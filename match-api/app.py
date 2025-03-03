@@ -81,8 +81,14 @@ def handle_request():
           # total number of tracks
         # the hyperparamters k,b are reported to be sensible for BM25 algorithm, but we can evaluate different settings for our use case 
         # we can also evaluate the effect of the hyperparameters alpha, beta, gamma which are used for instances where an artists songs should show in the songs section
-        hyperparams = {'k':1.2, 'b':0.75, 'alpha':1, 'beta':1, 'gamma':1}
-
+        # alpha: the artist score affecting the song score
+        # beta: the artist score affecting the album score
+        # gamma: the album score affecting the song score
+        
+        hyperparams = {'k':1.2, 'b':0.75, 'alpha':0.3, 'beta':0.4, 'gamma':0}
+        multipliers = {'names': 1, 'genres': 12, 'tags': 1}
+        # mulitpliers for the scores for titles, genres and tags (in that order)
+        multipliers = (multipliers['names'], multipliers['genres'], multipliers['tags'])
         # we give the capability to choose between BM25 and TFIDF for each of the different documents types that can do both: 
         # names (song names, artist names, album names), genres (song genres, artist genres, album genres), lyrics (song lyrics)
         ranking_algs = {'names': 'BM25', 'genres': 'BM25', 'lyrics': 'TFIDF'}
@@ -102,9 +108,9 @@ def handle_request():
             return total
 
         # temporarily just ordered based on the title score
-        sorted_track_scores = sorted(track_scores.items(), key=lambda item: sum(list(item[1])), reverse=True)
-        sorted_album_scores = sorted(album_scores.items(), key=lambda x: tuple_sum(x[1]), reverse=True)  # Now sort album_scores using the helper function
-        sorted_artist_scores = sorted(artist_scores.items(), key=lambda item: sum(list(item[1])), reverse=True)
+        sorted_track_scores = sorted(track_scores.items(), key=lambda item: sum(list(tuple(a*b for a, b in zip(item[1], multipliers)))), reverse=True)
+        sorted_album_scores = sorted(album_scores.items(), key=lambda item: tuple_sum(tuple(a*b for a, b in zip(item[1], multipliers))), reverse=True)  # Now sort album_scores using the helper function
+        sorted_artist_scores = sorted(artist_scores.items(), key=lambda item: sum(list(tuple(a*b for a, b in zip(item[1], multipliers)))), reverse=True)
         sorted_lyrics_scores = sorted(lyrics_scores.items(), key=lambda item: item[1], reverse=True)
 
         track_pages = len(sorted_track_scores) // limit + 1 if len(sorted_track_scores) % limit != 0 else 0
@@ -124,13 +130,13 @@ def handle_request():
         lyrics_data = index.track_ids_to_data(ranked_lyric_track_ids)
 
         # To see some of the results and that the search is working uncomment this code
-        # print("Track data results: ", '\n', track_data)
-        # print("Track scores: ", '\n', sorted_track_scores)
-        # print("Album data results: ", '\n', album_data)
-        # print("Album scores: ", '\n', sorted_album_scores)
-        # print("Artist data results: ", '\n', artist_data)
-        # print("Artist scores: ", '\n', sorted_artist_scores)
-        print("Lyrics data results: ", '\n', lyrics_data)
+        print("Track data results: ", '\n', track_data)
+        print("Track scores: ", '\n', sorted_track_scores[:10])
+        print("Album data results: ", '\n', album_data)
+        print("Album scores: ", '\n', sorted_album_scores[:10])
+        print("Artist data results: ", '\n', artist_data)
+        print("Artist scores: ", '\n', sorted_artist_scores[:10])
+        # print("Lyrics data results: ", '\n', lyrics_data)
         return {
             'songs': json.loads(track_data), 'albums' : json.loads(album_data), 'artists': json.loads(artist_data),
             'track_pages': track_pages, 'album_pages': album_pages, 'artist_pages': artist_pages

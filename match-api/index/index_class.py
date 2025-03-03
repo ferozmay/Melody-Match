@@ -1,18 +1,17 @@
 from index.store_load import load_data, store_data
 import numpy as np
 import json
-<<<<<<< HEAD
 from utils import parse_id
 import ast
+import pandas as pd
 
 
 similar_songs_dict = {}
 
 with open("data/stored_data/fma_sim_dict.json", "r") as f:
     similar_songs_dict = json.load(f)
-=======
-import pandas as pd
->>>>>>> 7c0501d4ada6e57b1628f8fe08fb75d59d63e9a4
+
+
 
 
 def handle_nan(value):
