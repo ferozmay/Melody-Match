@@ -7,28 +7,7 @@ N = None
 k, b = (None, None)
 hyperparams = None
 
-import re
-import itertools
 
-def parse_boolean_query(query):
-    # regex looks for either:
-    # 1. A word that's uppercase: AND, OR, NOT
-    # 2. A word that's lowercase or mixed-case (which we assume to be a term).
-    tokens = re.findall(r'\b(?:AND|OR|NOT|\w+)\b', query)
-    
-    is_boolean = False
-    # filter tokens to ensure only uppercase AND, OR, and NOT are considered operators
-    parsed_tokens = []
-    for token in tokens:
-        if token in ['AND', 'OR', 'NOT']:
-            # make sure the operator is uppercase
-            parsed_tokens.append(token)
-            is_boolean = True
-        else:
-            # treat everything else as a search term
-            parsed_tokens.append(token.lower())
-    
-    return parsed_tokens, is_boolean
 
 def search_rank(query: str, index, doclengths_track_data, doclengths_album_data, doclengths_artist_data, collection_size: int, hyperparams_dict: dict):
 

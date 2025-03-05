@@ -85,7 +85,7 @@ def handle_request():
         # beta: the artist score affecting the album score
         # gamma: the album score affecting the song score
         
-        hyperparams = {'k':1.2, 'b':0.75, 'alpha':0.3, 'beta':0.4, 'gamma':0}
+        hyperparams = {'k':1.5, 'b':0.75, 'alpha':0.4, 'beta':0.4, 'gamma':0}
         multipliers = {'names': 1, 'genres': 12, 'tags': 1}
         # mulitpliers for the scores for titles, genres and tags (in that order)
         multipliers = (multipliers['names'], multipliers['genres'], multipliers['tags'])
