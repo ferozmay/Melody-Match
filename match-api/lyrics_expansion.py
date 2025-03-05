@@ -6,81 +6,113 @@ To install fasttext & the english model, run the following commands:
 !pip install fasttext
 fasttext.util.download_model('en', if_exists='ignore')  # English
 
-
 '''
+import numpy as np
 import pickle
 import fasttext
 import fasttext.util
-from utils.text_processing import normalize, process_text
+from utils.text_processing import normalize, process_text, remove_stopwords, tokenize_text
 
-# def load_lyrics_inverted_index(path='data/lyrics_inverted_idx.pkl'):
-#     '''load the lyrics_inverted_index from a pickle file'''
-#     with open(path, 'rb') as file:
-#         lyrics_inverted_index = pickle.load(file)
-#     print(f"lyrics_inverted_index loaded from pickle at {path}")
-#     return lyrics_inverted_index
-
-def load_lyrics_similarity_dict(path='data/lyrics_similarity_dict.pkl'):
-    '''load the lyrics_similarity_dict from a pickle file'''
+def load_precomputed_similar_words(path):
     with open(path, 'rb') as file:
-        lyrics_similarity_dict = pickle.load(file)
-    print(f"lyrics_similarity_dict loaded from pickle at {path}")
-    return lyrics_similarity_dict
+        return pickle.load(file)
 
-def load_expansion_model_dicts(ft_path, lyrics_similarity_dict_path):
-    # Load word2vec model
-    ft = fasttext.load_model(ft_path)
-    print("fasttext model loaded")
+def get_word_vectors(words, ft):
+    '''Get the word vectors for a list of words using fasttext, and normalize them for cosine similarity.'''
 
-    # Load similar words dictionary
-    lyrics_similarity_dict = load_lyrics_similarity_dict(lyrics_similarity_dict_path)
+    # Compute vector matrix for lyrics words
+    word_vectors = np.array([ft.get_word_vector(word) for word in words]).astype('float32')
 
-    return ft, lyrics_similarity_dict
+    # Normalize vectors for cosine similarity
+    word_norms = np.linalg.norm(word_vectors, axis=1, keepdims=True)
+    word_norms[word_norms == 0] = 1  # Avoid division by zero
+    word_vectors /= word_norms  # Normalize all vectors
 
-def expand_query(query, lyrics_similarity_dict: dict, embeddings, verbose=False) -> set:
-    '''
-    Given a query, expand it with similar tokens from the lyrics BOW.
+    return word_vectors
 
-    First, check if the word is alrady in the lyrics_similarity_dict.
-    Otherwise, get the embeddings from fasttext and get the similar words
-    '''
+def fasttext_exact_nn(word, lyrics_vectors, lyrics_word_map, ft, k, threshold):
+    """
+    Finds the most similar words using exact cosine similarity through fasttext vectors
+    Returns a dictionary of the most similar stemmed words
 
-    # Convert query into a set of stemmed tokens
-    tokens = set(process_text(query).split())
-    
-    # Check for tokens not present in the lyrics
-    tokens_in_lyrics = tokens & set(lyrics_similarity_dict.keys())
-    unseen_tokens = tokens - tokens_in_lyrics
+    Args:
+        word: Query word.
+        lyrics_words: List of all lyrics words.
+        lyrics_vectors: Precomputed matrix of lyrics word vectors.
+        lyrics_word_map: Mapping from index to lyrics word.
+        ft: FastText model.
+        k: Number of nearest neighbors to retrieve.
+        threshold: Minimum similarity score.
 
-    # Expand with seen tokens
-    expanded_tokens = tokens_in_lyrics
-    expanded_tokens |= {similar_token for token in tokens_in_lyrics for similar_token in lyrics_similarity_dict[token]}
+    Returns:
+        Set of similar words that meet the threshold.
+    """
+    word_vector = np.array(ft.get_word_vector(word)).astype('float32')
 
-    # Expand with unseen tokens (if present)
-    if unseen_tokens:
-        for token in unseen_tokens:
-            # Get similar words for unseen tokens
-            similar_words = {word.lower() for score, word in embeddings.get_nearest_neighbors(token, k=20) if score > 0.7}
+    # Normalize input vector
+    word_norm = np.linalg.norm(word_vector)
+    if word_norm == 0:
+        return set()  # Avoid division by zero
 
-            # Normalize the words
-            similar_tokens = {token for token in normalize(similar_words) if token in lyrics_similarity_dict.keys()}
+    word_vector /= word_norm  # Normalize query vector
 
-            # Add the similar tokens to the set of tokens
-            expanded_tokens |= similar_tokens
+    # Compute exact cosine similarity with all lyrics words
+    similarities = np.dot(lyrics_vectors, word_vector)
 
-    if verbose:
-        print('Original tokens:', tokens)
-        print('Tokens not in lyrics:', unseen_tokens)
-    
-    # Return the expanded query
-    return expanded_tokens
+    # Get top-k similar words
+    top_indices = np.argsort(similarities)[::-1][:k]  # Sort descending, take top-k
+    similar_words = {lyrics_word_map[i] for i in top_indices if similarities[i] > threshold}
+
+    return similar_words
+
+def expand_query(query: str, ft, precomputed_similar_words, lyrics_vectors, lyrics_word_map, lyrics_5000_stems, threshold=0.8, k=20):
+    """
+    Expands a query by using precomputed similar words when available, 
+    and falling back to exact cosine similarity for unseen words.
+    """
+    # Tokenize, remove stopwords, and get unique words
+    words = remove_stopwords(tokenize_text(query))
+    stems = normalize(words)
+
+    extended_tokens = []
+
+    for word, stem in zip(words, stems):
+        if word in precomputed_similar_words:
+            similar_words = precomputed_similar_words[word]  # Use precomputed values
+        else:
+            similar_words = fasttext_exact_nn(word, lyrics_vectors, lyrics_word_map, ft, k=k, threshold=threshold)
+        
+        # Stem & remove duplicated words
+        similar_stems = set(normalize(similar_words)) | {stem}
+        # Add to the query only if the stem is in the 5000 top-stems
+        extended_tokens.extend([stem for stem in similar_stems if stem in lyrics_5000_stems])
+        
+        # Ensure similar_words does not contain the word
+        similar_words.discard(word)
+
+    return extended_tokens
 
 if __name__ == '__main__':
 
-    # Load all required models and dicts
-    ft, lyrics_similarity_dict = load_expansion_model_dicts('models/cc.en.300.bin', 'data/lyrics_similarity_dict.pkl')
+    # Paths
+    lyrics_precomputed_similar_path = 'data/stored_data/precomputed_similar_stems_lyrics.pkl'
+    lyrics_5000_stems_path = 'data/stored_data/lyrics_5000_stems.txt'
 
-    # Example query
-    query = 'I love dogs and crocodiles and rererereswe'
-    expanded_tokens = expand_query(query, lyrics_similarity_dict, ft, verbose=True)
-    print(query, '->', expanded_tokens)
+    # Load the fasttext model
+    ft = fasttext.load_model('models/cc.en.300.bin')
+
+    # Load the 5000 lyrics stems
+    with open(lyrics_5000_stems_path, 'r') as file:
+        lyrics_5000_stems = {stem.strip() for stem in file.readlines()}
+
+    # Load precomputed similar words
+    precomputed_similar_words = load_precomputed_similar_words(lyrics_precomputed_similar_path)
+
+    # Get the word vectors for the lyrics words
+    lyrics_words = list(precomputed_similar_words.keys())
+    lyrics_vectors = get_word_vectors(lyrics_words, ft)
+    lyrics_word_map = {i: word for i, word in enumerate(lyrics_words)}
+
+    query='I love cats in cute hats'
+    expanded_query = expand_query(query, ft, precomputed_similar_words, lyrics_vectors, lyrics_word_map, lyrics_5000_stems)
+    print(query, "->", expanded_query)
