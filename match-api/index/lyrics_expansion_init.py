@@ -10,12 +10,15 @@ Run from the command line (from match-api/ folder):
 python -m match-api.index.lyrics_expansion_initialisation
 
 '''
-from utils.text_processing import normalize
 import fasttext
 import fasttext.util
 import pickle
 import re
 import numpy as np
+import pandas as pd
+
+from utils.text_processing import normalize
+
 
 ### create index - related functions
 def read_lyrics(lyrics_train_path, lyrics_test_path):
@@ -59,10 +62,10 @@ def make_inverted_index(lyrics_word_dict: dict, all_words: list) -> dict:
     
     return inverted_index
 
-def save_lyrics_inverted_index(lyrics_inverted_index, path='data/stored_data/lyrics_inverted_word.pkl'):
+def save_lyrics_inverted_index(lyrics_inverted_index, path: str):
     with open(path, 'wb') as file:
         pickle.dump(lyrics_inverted_index, file)
-    print(f"lyrics_inverted_index saved as pickle at {path}")
+    print(f"lyrics_inverted_word saved as pickle at {path}")
 
 ### fasttext-related functions
 def get_ft_lyrics_words_from_(lyrics_stems: set, ft) -> list:
@@ -143,6 +146,20 @@ def precompute_similar_stems(lyrics_words, lyrics_vectors, k=20, threshold=0.8, 
 
     return precomputed_similar_stems
 
+def save_lyrics_doc_length(lyrics_dict_word: dict, save_path: str) -> None:
+    '''
+    Save the length of each document in the lyrics dataset
+    '''
+    # Create a length dictionary
+    lyrics_length_dict = {track_id: sum(word_dict.values()) for track_id, word_dict in lyrics_dict_word.items()}
+
+    # Convert into dataframe
+    lyrics_length_df = pd.DataFrame.from_dict(lyrics_length_dict, orient='index', columns=['doc_length'])
+
+    # Save the length dictionary into the h5 file
+    lyrics_length_df.to_hdf(save_path, key='lyrics_doc_length', mode='a')
+
+    return
 
 if __name__ == '__main__':
 
@@ -153,13 +170,14 @@ if __name__ == '__main__':
 
     # Output
     lyrics_5000_stems_path = 'data/stored_data/lyrics_5000_stems.txt'
-    lyrics_inverted_index_path = 'data/stored_data/lyrics_inverted_idx.pkl'
+    lyrics_inverted_index_path = 'data/stored_data/lyrics_inverted_index.pkl'
     lyrics_precomputed_similar_path = 'data/stored_data/precomputed_similar_stems_lyrics.pkl'
 
     # CREATE INVERTED INDEX
     # Load the data
     print("Loading data...")
     lyrics_dict_idx, lyrics_5000_stems = read_lyrics(lyrics_train_path, lyrics_test_path)
+
 
     # Make mappings from words to indices, where idx starts at 1
     word_to_idx = {word: index+1 for index, word in enumerate(lyrics_5000_stems)}
@@ -168,12 +186,18 @@ if __name__ == '__main__':
     # Create a dictionary with words instead of indices
     lyrics_dict_word = {track_id: {index_to_word[int(id)]: int(freq) for id, freq in word_dict.items()} for track_id, word_dict in lyrics_dict_idx.items()}
 
+    # Create a length dictionary
+    lyrics_length_dict = {track_id: sum(word_dict.values()) for track_id, word_dict in lyrics_dict_word.items()}
+
+    # Save the length dictionary into the h5 file
+    save_lyrics_doc_length(lyrics_dict_word, 'data/stored_data/lyrics_doc_length.h5')
+
     # Make inverted index
     print("Creating inverted index for lyrics dataset...")
     inverted_index = make_inverted_index(lyrics_dict_word, lyrics_5000_stems)
 
     # Save the inverted index
-    save_lyrics_inverted_index(inverted_index)
+    save_lyrics_inverted_index(inverted_index, lyrics_inverted_index_path)
 
     # PRECOMPUTE SIMILAR WORDS
 

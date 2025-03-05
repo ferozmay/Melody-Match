@@ -2,9 +2,11 @@ from index.store_load import load_data
 import numpy as np
 import json
 import pandas as pd
-from utils.text_processing import process_text
 import math
 import itertools
+
+from utils.text_processing import process_text
+from utils.lyrics_expansion import expand_query
 
 
 def handle_nan(value):
@@ -16,7 +18,7 @@ def handle_nan(value):
 
 class Index:
     def load_index(self):
-        self.track_data, self.album_data, self.artist_data, self.doclengths_track_data, self.doclengths_album_data, self.doclengths_artist_data, self.index, self.lyrics_index = load_data()
+        self.track_data, self.album_data, self.artist_data, self.doclengths_track_data, self.doclengths_album_data, self.doclengths_artist_data, self.index, self.lyrics_index, self.doclengths_lyrics, self.precomputed_similar_words_lyrics, self.lyrics_5000_stems, self.ft, self.lyrics_vectors, self.lyrics_word_map = load_data()
     
     def load_parameters(self, hyperparams: dict, ranking_algs: dict):
         self.hyperparams = hyperparams
@@ -297,8 +299,16 @@ class Index:
             scores[doc_id] += self.calculate_tfidf(tf, df)
 
 
-    def search_rank_lyrics(self, query:str):
-        query_tokens = process_text(query).split()
+    def search_rank_lyrics(self, query:str, expand:bool):
+
+        if expand:
+            query_tokens = expand_query(query, self.ft, self.precomputed_similar_words_lyrics, self.lyrics_vectors, self.lyrics_word_map, self.lyrics_5000_stems)
+        else:
+            query_tokens = process_text(query).split()
+        
+        print("Extended query:", query_tokens)
+
+        
         self.initialise_lyrics_scores_dict()
         for term in query_tokens:
             if term in self.lyrics_index:
@@ -311,19 +321,28 @@ class Index:
 
     
     def rank_lyrics(self, term):
-        """This function calculates the score for a song base don the bag of words representation of a song by its lyrics"""
+        """This function calculates the score for a song based on the bag of words representation of a song by its lyrics"""
         ranking_alg = self.ranking_algs['lyrics']
         msd_doc_ids = self.lyrics_index[term].keys()
         df = len(msd_doc_ids)
+
+        doclengths_df = self.doclengths_lyrics
+        doclengths_column = 'doc_length'
+
+        # TODO - Convert that to self.doclengths_lyrics_avg (so it doesn't get computed every time)
+        doclengths_avg = doclengths_df[doclengths_column].mean()
+
         for doc_id in msd_doc_ids: 
             if doc_id not in self.track_lyrics_scores.keys():
                     self.track_lyrics_scores[doc_id] = 0
             tf = self.lyrics_index[term][doc_id]
             
+            doclength = self.doclengths_lyrics[doclengths_column][doc_id]
+
             if tf == 0 or df == 0:
                 continue
-            # if ranking_alg == 'BM25':
-            #   self.track_lyrics_scores[doc_id] += self.calculate_bm25 --INSERT BM25 LYRICS CALCULATION HERE
+            if ranking_alg == 'BM25':
+               self.track_lyrics_scores[doc_id] += self.calculate_bm25(tf, df, doclength, doclengths_avg)
             elif ranking_alg == 'TFIDF':
                 self.track_lyrics_scores[doc_id] += self.calculate_tfidf(tf, df)
             
@@ -371,7 +390,7 @@ class Index:
         return idf * (tf * (k + 1)) / denom
 
         
-    def track_ids_to_data(self, track_ids, include_similar=False):
+    def track_ids_to_data(self, track_ids, include_similar=False, only_essential=False):
         track_data = self.track_data
         data = []
         single = False
@@ -395,25 +414,34 @@ class Index:
 
             genres = track_info[("track", "genres_string")]
 
-            data.append({
-                "id": track_id,
-                "title": handle_nan(track_info[("track", "title")]),
-                "artist": handle_nan(track_info[("artist", "name")]),
-                "runtime": handle_nan(track_info[("track", "duration")]),
-                "albumCover": handle_nan(track_info[("track", "track_image_file")]),
-                "link": handle_nan(track_info[("track", "track_url")]),
-                "artistLink": handle_nan(track_info.get(("track", "artist_url"))),
-                "album": handle_nan(track_info[("album", "title")]),
-                "albumLink": handle_nan(track_info.get(("track", "album_url"))),
-                "genres": genres,
-                "albumId": handle_nan(track_info[("album", "id")]),
-                "artistId": handle_nan(track_info[("artist", "id")]),
-                "similarSongs": similar_songs
-            })
+            if only_essential:
+                data.append({
+                    "id": track_id,
+                    "title": handle_nan(track_info[("track", "title")]),
+                    "artist": handle_nan(track_info[("artist", "name")]),
+                    "album": handle_nan(track_info[("album", "title")]),
+                    "runtime": handle_nan(track_info[("track", "duration")]),
+                })
+            else:
+                data.append({
+                    "id": track_id,
+                    "title": handle_nan(track_info[("track", "title")]),
+                    "artist": handle_nan(track_info[("artist", "name")]),
+                    "runtime": handle_nan(track_info[("track", "duration")]),
+                    "albumCover": handle_nan(track_info[("track", "track_image_file")]),
+                    "link": handle_nan(track_info[("track", "track_url")]),
+                    "artistLink": handle_nan(track_info.get(("track", "artist_url"))),
+                    "album": handle_nan(track_info[("album", "title")]),
+                    "albumLink": handle_nan(track_info.get(("track", "album_url"))),
+                    "genres": genres,
+                    "albumId": handle_nan(track_info[("album", "id")]),
+                    "artistId": handle_nan(track_info[("artist", "id")]),
+                    "similarSongs": similar_songs
+                })
         
         if single:
             return json.dumps(data[0], default=str)
-        return json.dumps(data, default=str)
+        return json.dumps(data, default=str, indent=4)
 
     def album_ids_to_data(self, album_ids, include_tracks=False):
         album_data = self.album_data

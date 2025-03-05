@@ -11,7 +11,7 @@ import numpy as np
 import pickle
 import fasttext
 import fasttext.util
-from utils.text_processing import normalize, process_text, remove_stopwords, tokenize_text
+from utils.text_processing import normalize, remove_stopwords, tokenize_text, stopwords
 
 def load_precomputed_similar_words(path):
     with open(path, 'rb') as file:
@@ -65,18 +65,23 @@ def fasttext_exact_nn(word, lyrics_vectors, lyrics_word_map, ft, k, threshold):
 
     return similar_words
 
-def expand_query(query: str, ft, precomputed_similar_words, lyrics_vectors, lyrics_word_map, lyrics_5000_stems, threshold=0.8, k=20):
+def expand_query(query: str, ft, precomputed_similar_words, lyrics_vectors, lyrics_word_map, lyrics_5000_stems, threshold=0.7, k=20):
     """
     Expands a query by using precomputed similar words when available, 
     and falling back to exact cosine similarity for unseen words.
     """
     # Tokenize, remove stopwords, and get unique words
-    words = remove_stopwords(tokenize_text(query))
+    words = tokenize_text(query)
     stems = normalize(words)
 
     extended_tokens = []
 
     for word, stem in zip(words, stems):
+        if word in stopwords:
+            # Do not extend stopwords
+            extended_tokens.append(word)
+            continue
+
         if word in precomputed_similar_words:
             similar_words = precomputed_similar_words[word]  # Use precomputed values
         else:
@@ -84,11 +89,9 @@ def expand_query(query: str, ft, precomputed_similar_words, lyrics_vectors, lyri
         
         # Stem & remove duplicated words
         similar_stems = set(normalize(similar_words)) | {stem}
+        
         # Add to the query only if the stem is in the 5000 top-stems
         extended_tokens.extend([stem for stem in similar_stems if stem in lyrics_5000_stems])
-        
-        # Ensure similar_words does not contain the word
-        similar_words.discard(word)
 
     return extended_tokens
 

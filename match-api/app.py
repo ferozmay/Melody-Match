@@ -14,9 +14,10 @@ from utils.ids_to_data import track_ids_to_data, album_ids_to_data, artist_ids_t
 # init the app
 app = Flask(__name__)
 
-@app.errorhandler(Exception)
-def handle_any_exception(e):
-    return {"error": str(e)}, 500
+# TODO - Uncomment that once everything is working
+# @app.errorhandler(Exception)
+# def handle_any_exception(e):
+#     return {"error": str(e)}, 500
 
 # Set up CORS to prevent blockage of requests from local domains
 cors = CORS(
@@ -78,6 +79,7 @@ def handle_request():
     page = int(request.args.get("page", 1))
 
     if query:
+
           # total number of tracks
         # the hyperparamters k,b are reported to be sensible for BM25 algorithm, but we can evaluate different settings for our use case 
         # we can also evaluate the effect of the hyperparameters alpha, beta, gamma which are used for instances where an artists songs should show in the songs section
@@ -91,10 +93,10 @@ def handle_request():
         multipliers = (multipliers['names'], multipliers['genres'], multipliers['tags'])
         # we give the capability to choose between BM25 and TFIDF for each of the different documents types that can do both: 
         # names (song names, artist names, album names), genres (song genres, artist genres, album genres), lyrics (song lyrics)
-        ranking_algs = {'names': 'BM25', 'genres': 'BM25', 'lyrics': 'TFIDF'}
+        ranking_algs = {'names': 'BM25', 'genres': 'BM25', 'lyrics': 'BM25'}
         index.load_parameters(hyperparams, ranking_algs)
         track_scores, album_scores, artist_scores = index.search_rank(query)
-        lyrics_scores = index.search_rank_lyrics(query)
+        lyrics_scores = index.search_rank_lyrics(query, expand=True)
 
         # Define a helper function to sum the values of a tuple 
         def tuple_sum(t):
@@ -127,16 +129,17 @@ def handle_request():
         album_data = index.album_ids_to_data(ranked_album_ids)
         artist_data = index.artist_ids_to_data(ranked_artist_ids)
         
-        lyrics_data = index.track_ids_to_data(ranked_lyric_track_ids)
+        lyrics_data = index.track_ids_to_data(ranked_lyric_track_ids, only_essential=True)  # Only print the essential data
 
         # To see some of the results and that the search is working uncomment this code
-        print("Track data results: ", '\n', track_data)
-        print("Track scores: ", '\n', sorted_track_scores[:10])
-        print("Album data results: ", '\n', album_data)
-        print("Album scores: ", '\n', sorted_album_scores[:10])
-        print("Artist data results: ", '\n', artist_data)
-        print("Artist scores: ", '\n', sorted_artist_scores[:10])
-        # print("Lyrics data results: ", '\n', lyrics_data)
+        # print("Track data results: ", '\n', track_data)
+        # print("Track scores: ", '\n', sorted_track_scores[:10])
+        # print("Album data results: ", '\n', album_data)
+        # print("Album scores: ", '\n', sorted_album_scores[:10])
+        # print("Artist data results: ", '\n', artist_data)
+        # print("Artist scores: ", '\n', sorted_artist_scores[:10])
+        print("Lyrics data results: ", '\n', lyrics_data)
+
         return {
             'songs': json.loads(track_data), 'albums' : json.loads(album_data), 'artists': json.loads(artist_data),
             'track_pages': track_pages, 'album_pages': album_pages, 'artist_pages': artist_pages
