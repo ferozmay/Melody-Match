@@ -39,3 +39,7 @@ def process_text(text: str):
     # tokens = remove_stopwords(tokens)
     tokens = normalize(tokens)
     return " ".join(tokens)
+
+
+if __name__ == "__main__":
+    print(process_text("Mr. SOS"))

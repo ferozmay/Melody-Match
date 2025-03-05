@@ -48,10 +48,6 @@ def process_track_data(track_data, token_genres_dict):
     # flatten multi-index columns - since the preprocessed track data df will only contain track info
     pp_track_data.columns = ['_'.join(col) for col in pp_track_data.columns]
 
-    # this line could also be done with the original data frame instead, so may change to there at some stage
-    # is essentially just putting the list of genres for a track in a dict with the genre as a key and the value being the frequency of the genres ( will jsut be 1 for all) and the number of genres has key 'total'
-    pp_track_data[('track_genres')] = pp_track_data[('track_genres')].apply(lambda x : create_genre_dict(x, threshold = 0.0))
-    
     # converting the integer representation of genres to token representation
     pp_track_data[('track_genres')] = pp_track_data['track_genres'].apply(lambda track_genres_list: {token_genres_dict[genre]: count for genre, count in track_genres_list.items()})
 

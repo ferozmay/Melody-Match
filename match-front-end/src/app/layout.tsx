@@ -28,7 +28,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
-        <div className="w-full bg-custom-gradient bg-fixed bg-cover min-h-screen flex items-center justify-center">
+        <div className="w-full bg-custom-gradient bg-fixed bg-cover min-h-screen flex items-center justify-center pb-12">
           {children}
         </div>
         {/* footer */}
