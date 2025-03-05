@@ -65,6 +65,7 @@ def load_data():
     
     with open("data/stored_data/inverted_index.pkl", "rb") as f:
         inverted_index = pickle.load(f)
+    # lyrics_index = None
     with open("data/stored_data/lyrics_inverted_word.pkl", "rb") as g:
         lyrics_index = pickle.load(g)
 
