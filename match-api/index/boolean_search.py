@@ -28,12 +28,21 @@ def infix_to_postfix(tokens):
 
 
 
-def evaluate_postfix(postfix_tokens, search_index):
+def evaluate_postfix(
+        postfix_tokens, 
+        search_index, 
+        access_function=lambda term, index: index.get(term, set())
+    ):
+    """
+    Evaluate the boolean expression in postfix notation.
+    :param postfix_tokens: A list of tokens in postfix notation.
+    :param search_index: A SearchIndex object.
+    :return: A set of document IDs that satisfy the boolean expression.
+    """
     stack = []
-    print(postfix_tokens)
     for token in postfix_tokens:
         if token.isalnum() and token not in ["AND", "OR", "NOT"]:
-            docs = search_index.lookup(token)
+            docs = set(access_function(token, search_index))
             # print(f"Lookup for '{token}': {docs}")
             stack.append(docs)
             # print(f"Stack: {stack}")
@@ -48,8 +57,8 @@ def evaluate_postfix(postfix_tokens, search_index):
         elif token == "NOT":
             operand = stack.pop()
             # print(f"NOT operation: {operand}")
-            # Assuming a universal document set (optional, depends on implementation)
-            all_docs = set.union(*search_index.index.values()) if search_index.index else set()
+            all_values = [access_function(term, search_index) for term in search_index.keys()]
+            all_docs = set.union(*all_values) if search_index else set()
             # print(f"all_docs: {all_docs}")
             stack.append(all_docs - operand)
         elif token == "OR":
@@ -87,10 +96,10 @@ def unit_test_boolean_search():
     result = evaluate_postfix(postfix, search_index)
     expected_result = {1, 2, 3, 5, 6, 7}
     assert result == expected_result, f"Expected {expected_result}, but got {result}"
-    # print("Boolean search test passed!")
+    print("Boolean search test passed!")
 
 
-def generate_sample_index():
+def generate_sample_index() -> dict:
     search_index = SearchIndex()
     search_index.add_document(1, ["apple", "banana", "cherry"])
     search_index.add_document(2, ["apple", "cherry", "date"])
@@ -99,7 +108,7 @@ def generate_sample_index():
     search_index.add_document(5, ["fig", "apple", "banana"])
     search_index.add_document(6, ["apple", "banana", "cherry"])
     search_index.add_document(7, ["fig", "apple", "banana"])
-    return search_index
+    return search_index.index
 
 
 class SearchIndex:
@@ -111,9 +120,6 @@ class SearchIndex:
             if term not in self.index:
                 self.index[term] = set()
             self.index[term].add(doc_id)
-
-    def lookup(self, term):
-        return self.index.get(term, set())
 
 
 if __name__ == "__main__":

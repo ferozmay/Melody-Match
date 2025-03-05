@@ -1,11 +1,26 @@
+import ast
 from index.store_load import load_data
+from index.boolean_search import infix_to_postfix, evaluate_postfix, boolean_tokenize
 import numpy as np
 import json
 import pandas as pd
 from utils.text_processing import process_text
+from utils import parse_id
 import math
 import itertools
 
+
+similar_songs_dict = {}
+
+with open("data/stored_data/fma_sim_dict.json", "r") as f:
+    similar_songs_dict = json.load(f)
+
+
+def is_fma(track_id):
+    _id = parse_id(track_id)
+    if isinstance(_id, int):
+        return True
+    return False
 
 def handle_nan(value):
     # if the value is NaN replace it with None (for valid JSON)
@@ -36,6 +51,16 @@ class Index:
     
     def initialise_lyrics_scores_dict(self):
         self.track_lyrics_scores = dict()
+
+    def boolean_filter(self, query: str, collection: dict, access_function):
+        """
+        Takes in a query, converts to postfix
+        and evaluates the postfix expression on the index
+        Returns the set of doc_ids that satisfy the query
+        """
+        tokens = boolean_tokenize(query)
+        postfix = infix_to_postfix(tokens)
+        return evaluate_postfix(postfix, collection, access_function)
         
     def search_rank(self, query: str):
         """This function takes in a query, the index, teh various document lengths dfs and the collection size and hyperparameters for the search.
@@ -46,16 +71,22 @@ class Index:
         This means that the tracks_scores dictionary for example will contain ids for all the tracks relevant to the search/ query and associated with each id will be a 
         score for the relevance of the track name, the track's genres and the track's tags to the query. """
 
-        query_tokens = process_text(query).split()
         
         self.initialise_scores_dict()
 
         object_types = ['Artist', 'Album', 'Track']
         document_types = ['Name', 'Genres', 'Tags']
         pairs = list(itertools.product(object_types, document_types))
-        
+
+        # drop caps'ed AND, OR, NOT from query
+        is_boolean = any([word in query for word in ['AND', 'OR', 'NOT']])
+        unbooled_query = query.replace('AND', '').replace('OR', '').replace('NOT', '')
+        query_tokens = process_text(unbooled_query).split()
+
+
         for pair in pairs:
             for term in query_tokens:
+                # .boolean_filter(query):
                 if term in self.index:
                     if pair[1] == 'Name':
                         if pair[0] == 'Artist':
@@ -80,18 +111,40 @@ class Index:
                         if pair[0] == 'Artist':
                             self.rank_tags(term, pair[0], self.doclengths_artist_data,  self.artist_tags_scores)
                 else:
-                    continue    
-
-            
+                    continue
         #track dictionary
         track_keys = set(self.track_title_scores.keys()) | set(self.track_genres_scores.keys()) | set(self.track_tags_scores.keys()) 
-        track_scores = {doc_id: (self.track_title_scores.get(doc_id, 0), self.track_genres_scores.get(doc_id, 0), self.track_tags_scores.get(doc_id, 0)) for doc_id in track_keys} 
+        track_scores = {doc_id: (self.track_title_scores.get(doc_id, 0), self.track_genres_scores.get(doc_id, 0), self.track_tags_scores.get(doc_id, 0)) for doc_id in track_keys}
         #album dictionary
-        album_keys = set(self.album_title_scores.keys()) | set(self.album_genres_scores.keys()) | set(self.album_tags_scores.keys()) 
+        album_keys = set(self.album_title_scores.keys()) | set(self.album_genres_scores.keys()) | set(self.album_tags_scores.keys())
         album_scores = {doc_id: (self.album_title_scores.get(doc_id, 0),  self.album_genres_scores.get(doc_id, 0),  self.album_tags_scores.get(doc_id, 0)) for doc_id in album_keys}
         # artist dictionary
         artist_keys = set(self.artist_title_scores.keys()) | set(self.artist_genres_scores.keys()) | set(self.artist_tags_scores.keys())
         artist_scores = {doc_id: (self.artist_title_scores.get(doc_id, 0), self.artist_genres_scores.get(doc_id, 0),  self.artist_tags_scores.get(doc_id, 0)) for doc_id in artist_keys}
+        
+        # apply boolean filter to the track scores
+        if is_boolean:
+            # tracks
+            filtered_track_ids = self.boolean_filter(
+                query,
+                self.index,
+                lambda term, index: set(index.get(process_text(term), {}).get('Track', {}).get('Name', {}).get('doc_ids', {}).keys())
+            )
+            track_scores = {doc_id: score for doc_id, score in track_scores.items() if doc_id in filtered_track_ids}
+            # albums
+            filtered_album_ids = self.boolean_filter(
+                query,
+                self.index,
+                lambda term, index: set(index.get(process_text(term), {}).get('Album', {}).get('Name', {}).get('doc_ids', {}).keys())
+            )
+            album_scores = {doc_id: score for doc_id, score in album_scores.items() if doc_id in filtered_album_ids}
+            # artists
+            filtered_artist_ids = self.boolean_filter(
+                query,
+                self.index,
+                lambda term, index: set(index.get(process_text(term), {}).get('Artist', {}).get('Name', {}).get('doc_ids', {}).keys())
+            )
+            artist_scores = {doc_id: score for doc_id, score in artist_scores.items() if doc_id in filtered_artist_ids}
         
         
         return track_scores, album_scores, artist_scores
@@ -391,7 +444,13 @@ class Index:
             track_info = track_data.loc[track_id]
             similar_songs = []
             if include_similar:
-                similar_songs = json.loads(self.track_ids_to_data(track_data.iloc[:10].index.tolist()))
+                if is_fma(track_id):
+                    similar_songs = json.loads(self.track_ids_to_data(self.get_similar_songs(track_id)))
+                else:
+                    items = ast.literal_eval(self.track_data.loc[track_id, ("track", "similars")])
+                    similar_songs = list(items.keys())
+                    similar_songs = json.loads(self.track_ids_to_data(similar_songs))
+                    # similar_songs = self.track_data.loc[track_id][["track", "similars"]]
 
             genres = track_info[("track", "genres_string")]
 

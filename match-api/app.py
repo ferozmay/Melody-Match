@@ -6,7 +6,6 @@ from flask_cors import CORS, cross_origin
 from index.index_data_ranking import Index
 import pickle, pandas as pd, time
 import threading
-from search_rank import search_rank
 from utils import parse_id
 from utils.preview.youtube import search_youtube_id
 from utils.ids_to_data import track_ids_to_data, album_ids_to_data, artist_ids_to_data
@@ -16,6 +15,7 @@ app = Flask(__name__)
 
 @app.errorhandler(Exception)
 def handle_any_exception(e):
+    print(e)
     return {"error": str(e)}, 500
 
 # Set up CORS to prevent blockage of requests from local domains
@@ -25,7 +25,6 @@ cors = CORS(
 )
 
 def load_index():
-
     global index
     index = Index()
     

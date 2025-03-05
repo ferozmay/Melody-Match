@@ -1,6 +1,6 @@
 import pandas as pd
 from utils.text_processing import process_text
-from index.data_cleaning import create_genre_dict
+from index.data_preprocessing.data_cleaning import create_genre_dict
 
 # the use of 'pp_' is just to differentiate that data frame as being the preprocessed version of the original, only needed for making the inverted index
 

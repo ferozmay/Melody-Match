@@ -1,7 +1,7 @@
 import pickle
 import pandas as pd
-from index.data_cleaning import clean_and_make_data
-from index.data_processing import process_data
+from index.data_preprocessing.data_cleaning import clean_and_make_data
+from index.data_preprocessing.data_processing import process_data
 from index.inverted_index import create_inverted_index
 import json
 

@@ -1,5 +1,5 @@
 import numpy as np, pandas as pd, ast
-from index.msd_cleaning import *
+from index.data_preprocessing.msd_cleaning import *
 
 """This is a module for cleaning the FMA data. Essentially, it loads the data from fma_metadata folder into data frames. It also adds some columns that would be useful for the data frames
 and fixes any issues for columns that the enry is not usable. In essence it is preparing the data we have gotten from the FMA, so that we can make an inverted index with it and display data on the front end."""
