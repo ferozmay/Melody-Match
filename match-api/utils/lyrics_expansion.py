@@ -2,9 +2,6 @@
 Use fasttext to expand the query with similar words from the lyrics BOW. Return a set with the tokens and it similar words
 Info: https://fasttext.cc/docs/en/crawl-vectors.html
 
-To install fasttext & the english model, run the following commands:
-!pip install fasttext
-fasttext.util.download_model('en', if_exists='ignore')  # English
 
 '''
 import numpy as np

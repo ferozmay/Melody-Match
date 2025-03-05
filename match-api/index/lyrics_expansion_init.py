@@ -6,6 +6,11 @@ Lyrics in BOW format can be downloaded from here:
 train_file: http://millionsongdataset.com/sites/default/files/AdditionalFiles/mxm_dataset_train.txt.zip
 test_file: http://millionsongdataset.com/sites/default/files/AdditionalFiles/mxm_dataset_test.txt.zip
 
+To install fasttext & the english model, run the following commands:
+!pip install fasttext
+fasttext.util.download_model('en', if_exists='ignore')  # English
+
+
 Run from the command line (from match-api/ folder):
 python -m match-api.index.lyrics_expansion_initialisation
 
@@ -16,9 +21,10 @@ import pickle
 import re
 import numpy as np
 import pandas as pd
+import os
+import sys
 
 from utils.text_processing import normalize
-
 
 ### create index - related functions
 def read_lyrics(lyrics_train_path, lyrics_test_path):
@@ -200,6 +206,13 @@ if __name__ == '__main__':
     save_lyrics_inverted_index(inverted_index, lyrics_inverted_index_path)
 
     # PRECOMPUTE SIMILAR WORDS
+
+    # Download the fasttext model
+    if not os.path.exists('models/cc.en.300.bin'):
+        print("Downloading the model...")
+        fasttext.util.download_model('en', if_exists='ignore')  # English
+        print("Model downloaded. It must be moved to 'models/ folder. Rerun the script after moving the model.")
+        sys.exit()
 
     # Load the fasttext model
     print("Loading fasttext model...")
