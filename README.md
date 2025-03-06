@@ -4,3 +4,8 @@
 </div>
 
 Melody Match: Match any vibe with free music!
+
+### GCloud bucket mounting
+- Mount: `sudo mount -t gcsfuse -o rw,noauto,user,implicit_dirs,allow_other melody-match-fma /home/plush337/fma-bucket/`
+- Unmount: `sudo umount /home/plush337/fma-bucket`
+- Before starting nginx, the bucket needs to be mounted

@@ -1,10 +1,12 @@
 import { SONGS_URL } from "./const";
 
-const getSong = async (song_id: string) => {
-  const songs = await fetch(SONGS_URL + `/${song_id}`).then((res) =>
-    res.json()
+const getSong = async (song_id: string) => fetch(SONGS_URL + `/${song_id}`);
+
+export const getYouTubeID = async (song_id: string) => {
+  const youtubeID = await fetch(SONGS_URL + `/${song_id}/youtube_id`).then(
+    (res) => res.json()
   );
-  return songs;
+  return youtubeID;
 };
 
 export default getSong;

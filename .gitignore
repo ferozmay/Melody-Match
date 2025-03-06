@@ -64,6 +64,11 @@ similarity_research/models/
 lyrics_research/cc.en.300.bin
 lyrics_research/data
 
+# Lyrics query expansion
+!match-api/data/lyrics_similarity_dict.pkl # keep this file
+match-api/models/
+lyrics_research/data
+
 # virtual environments
 venv/
 .venv/
