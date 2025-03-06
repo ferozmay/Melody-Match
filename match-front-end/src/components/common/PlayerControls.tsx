@@ -167,7 +167,7 @@ const PlayerControls = () => {
   }, [isPlaying, updateTime]);
 
   return (
-    <div className="z-10 px-4 py-2 fixed w-[700px] inset-x-0 mx-auto bottom-12 center bg-white bg-opacity-95 text-black rounded-lg shadow-lg transition duration-150 hover:shadow-2xl gap-4 flex items-center">
+    <div className="z-10 px-4 py-2 mx-12 lg:mx-auto fixed lg:max-w-[700px] inset-x-0 bottom-12 center bg-white bg-opacity-95 text-black rounded-lg shadow-lg transition duration-150 hover:shadow-2xl gap-4 flex items-center">
       <div className="hidden">
         <YouTube
           videoId={youtubeID || ""}
@@ -219,13 +219,13 @@ const PlayerControls = () => {
           ))}
       </button>
       <div className="time flex flex-col w-full">
-        <p className="text-2xl      hover:text-blue-500 cursor-pointer">
+        <p className="lg:text-2xl hover:text-blue-500 cursor-pointer line-clamp-1">
           {currentSong?.title || "No Song Playing"}
         </p>
-        <p className="text-md -mt-2 hover:text-blue-500 cursor-pointer">
+        <p className="text-sm lg:text-md -mt-2 hover:text-blue-500 cursor-pointer line-clamp-1">
           {currentSong?.artist || "No Artist"}
         </p>
-        <span className="h-2 w-full bg-blue-500 rounded"></span>
+        <span className="h-2 text-sm lg:text-md w-full bg-blue-500 rounded"></span>
         <div className="flex text-md justify-between">
           <span>{convertRuntime(currentTime) || 0}</span>
           <span>{convertRuntime(duration) || 0}</span>

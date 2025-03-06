@@ -19,7 +19,14 @@ const SearchBar = ({ searchInput, setSearchInput }: SearchBarProps) => {
         className="flex-1 h-11 border-0 bg-transparent text-white text-lg px-4 focus:outline-none font-mono placeholder-white/70"
         type="text"
         value={searchInput}
-        onChange={(e) => setSearchInput(e.target.value)}
+        maxLength={100}
+        onChange={(e) => {
+          if (
+            e.target.value.split(" ").length > 0 &&
+            e.target.value.split(" ").length <= 15
+          )
+            setSearchInput(e.target.value);
+        }}
         // onKeyDown={handleKeyDown}
         placeholder="Search for music..."
         title="Search"

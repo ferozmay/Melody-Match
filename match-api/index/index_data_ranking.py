@@ -130,21 +130,21 @@ class Index:
                 self.index,
                 lambda term, index: set(index.get(process_text(term), {}).get('Track', {}).get('Name', {}).get('doc_ids', {}).keys())
             )
-            track_scores = {doc_id: score for doc_id, score in track_scores.items() if doc_id in filtered_track_ids}
+            track_scores = {doc_id: track_scores.get(doc_id) for doc_id in filtered_track_ids if doc_id in track_scores}
             # albums
             filtered_album_ids = self.boolean_filter(
                 query,
                 self.index,
                 lambda term, index: set(index.get(process_text(term), {}).get('Album', {}).get('Name', {}).get('doc_ids', {}).keys())
             )
-            album_scores = {doc_id: score for doc_id, score in album_scores.items() if doc_id in filtered_album_ids}
+            album_scores = {doc_id: album_scores.get(doc_id) for doc_id in filtered_album_ids if doc_id in album_scores}
             # artists
             filtered_artist_ids = self.boolean_filter(
                 query,
                 self.index,
                 lambda term, index: set(index.get(process_text(term), {}).get('Artist', {}).get('Name', {}).get('doc_ids', {}).keys())
             )
-            artist_scores = {doc_id: score for doc_id, score in artist_scores.items() if doc_id in filtered_artist_ids}
+            artist_scores = {doc_id: artist_scores.get(doc_id) for doc_id in filtered_artist_ids if doc_id in artist_scores}
         
         
         return track_scores, album_scores, artist_scores
@@ -496,11 +496,11 @@ class Index:
             # # turn genre ids into genre names
             # album_info["album_genres"] = self.genre_ids_to_words(album_genres)
             
-            
             data.append({
                 "id": album_id,
                 "title": handle_nan(album_info[("album_title")]),
                 "artist": handle_nan(album_info[("artist_name")]),
+                # "artistId": handle_nan(album_info[("artist_id")]),
                 "releaseDate": handle_nan(album_info[("album_date_released")]),
                 "albumCover": handle_nan(album_info[("album_image_file")]),
                 "noOfTracks": handle_nan(album_info[("album_tracks")]),

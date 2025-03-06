@@ -21,7 +21,7 @@ const AlbumClient = ({ album }: { album: Album }) => {
           <h1 className="text-6xl font-extrabold text-orange-400 text-left mb-4">
             {album?.title}
           </h1>
-          <Link href={`/artist/${album?.id}`}>
+          <Link href={`/artist/${album?.artistId}`}>
             <h2 className="text-xl font-semibold text-white hover:text-gray-200 text-left">
               {album?.artist}
             </h2>

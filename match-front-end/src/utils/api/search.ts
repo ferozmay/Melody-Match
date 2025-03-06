@@ -8,12 +8,13 @@ const useApiSearch = () => {
   const [results, setResults] = useState<SearchResults>({} as SearchResults);
   const [query, setQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const debouncedQuery = useDebounce(query, 500);
+  const debouncedQuery = useDebounce(query, 1500);
   const activePage = paginatorStore((state) => state.activePage);
 
   useEffect(() => {
     if (debouncedQuery) {
       setLoading(true);
+      setResults({} as SearchResults);
       fetch(
         `${SEARCH_URL}?query=${encodeURIComponent(query)}&page=${activePage}`,
         {
@@ -25,6 +26,7 @@ const useApiSearch = () => {
         .then((response) => response.json())
         .then((data) => {
           setResults(data);
+          console.log("got data", data);
           setLoading(false);
         })
         .catch((error) => {
@@ -34,16 +36,16 @@ const useApiSearch = () => {
     } else {
       setLoading(false);
     }
-
-    setLoading(true);
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
+    // setLoading(true);
+    // const timer = setTimeout(() => {
+    //   setLoading(false);
+    // }, 500);
+    // return () => clearTimeout(timer);
   }, [debouncedQuery, activePage]);
 
   return {
     query,
+    debouncedQuery,
     setQuery,
     results,
     loading,

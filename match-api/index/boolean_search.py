@@ -39,14 +39,20 @@ def evaluate_postfix(
     :param search_index: A SearchIndex object.
     :return: A set of document IDs that satisfy the boolean expression.
     """
+    # compute universal set once
+    all_values = [access_function(term, search_index) for term in search_index.keys()]
+    all_docs = set.union(*all_values) if search_index else set()
+    # 
     stack = []
     for token in postfix_tokens:
         if token.isalnum() and token not in ["AND", "OR", "NOT"]:
+            print("retrieve")
             docs = set(access_function(token, search_index))
             # print(f"Lookup for '{token}': {docs}")
             stack.append(docs)
             # print(f"Stack: {stack}")
         elif token == "AND":
+            print("AND")
             right = stack.pop()
             left = stack.pop()
             # print(f"AND operation: {left} & {right}")
@@ -55,22 +61,49 @@ def evaluate_postfix(
             stack.append(result)
             # print(f"Stack: {stack}")
         elif token == "NOT":
+            print("NOT")
             operand = stack.pop()
             # print(f"NOT operation: {operand}")
-            all_values = [access_function(term, search_index) for term in search_index.keys()]
-            all_docs = set.union(*all_values) if search_index else set()
+            # apply not to previous operand
+            # if stack:
+            #     previous_operand = stack[-1] if stack else set()
+            #     result = previous_operand.difference(operand)
+            # else:
+            result = all_docs - operand
             # print(f"all_docs: {all_docs}")
-            stack.append(all_docs - operand)
+            stack.append(result)
+            # print(f"Stack: {stack}")
         elif token == "OR":
+            print("OR")
             right = stack.pop()
             left = stack.pop()
+            # print(f"OR operation: {left} | {right}")
             stack.append(left | right)
-
-    return stack[0] if stack else set()
+            # print(f"Stack: {stack}")
+    # print(f"Final stack: {stack}")
+    return set(stack[0]) if stack else set()
 
 
 def boolean_tokenize(query):
-    return re.findall(r'\(|\)|\w+|AND|OR|NOT', query)
+    # First, extract all tokens using regex
+    raw_tokens = re.findall(r'\(|\)|\w+|AND|OR|NOT', query)
+    # Now insert AND between adjacent regular terms
+    result = []
+    for i, token in enumerate(raw_tokens):
+        result.append(token)
+        # Check if we need to insert an AND
+        if i < len(raw_tokens) - 1:
+            current = token
+            next_token = raw_tokens[i + 1]
+            # Insert AND if:
+            # 1. Current token is a term or closing bracket
+            # 2. Next token is a term or opening bracket
+            # 3. Neither is an operator
+            if (current not in ["AND", "OR", "NOT", "("]) and \
+               (next_token not in ["AND", "OR", "NOT", ")", "("]) and \
+               (current != ")" or next_token != "("):
+                result.append("AND")
+    return result
 
 
 def unit_test_infix_to_postfix():
@@ -80,6 +113,21 @@ def unit_test_infix_to_postfix():
     expected_postfix = ["apple", "NOT", "banana", "AND", "cherry", "date", "fig", "NOT", "OR", "AND", "OR"]
     assert postfix == expected_postfix, f"Expected {expected_postfix}, but got {postfix}"
     print("Infix2Postfix test passed!")
+
+
+def unit_test_not_operator():
+    #     apple     AND NOT    fig
+    # {1,2,4,5,6,7} AND NOT {3,4,5,7}
+    # {1,2,4,5,6,7} AND {1,2,6}
+    #           {1,2,6}
+    query = "apple AND NOT fig"
+    tokens = boolean_tokenize(query)
+    postfix = infix_to_postfix(tokens)
+    search_index = generate_sample_index()
+    result = evaluate_postfix(postfix, search_index)
+    expected_result = {1, 2, 6}
+    assert result == expected_result, f"Expected {expected_result}, but got {result}"
+    print("NOT operator test passed!")
 
 
 def unit_test_boolean_search():
@@ -124,4 +172,8 @@ class SearchIndex:
 
 if __name__ == "__main__":
     unit_test_infix_to_postfix()
+    unit_test_not_operator()
+    # q = "green oranges OR (black 50 cent)"
+    # t = boolean_tokenize(q)
+    # print(t)
     unit_test_boolean_search()

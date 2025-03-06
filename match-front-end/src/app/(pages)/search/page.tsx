@@ -10,6 +10,7 @@ import { SearchResults } from "@/utils/types/searchResults";
 import ArtistsTab from "@/components/search/tabs/ArtistsTab";
 import AlbumsTab from "@/components/search/tabs/AlbumsTab";
 import paginatorStore, { PaginatorStoreProps } from "@/utils/store/paginator";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 const TabSelector = ({
   activeTab,
@@ -48,7 +49,7 @@ const SearchResultsComponent = () => {
     (state: PaginatorStoreProps) => state.setActivePage
   );
 
-  const { query, setQuery, results, loading } = useApiSearch();
+  const { query, setQuery, results, loading, debouncedQuery } = useApiSearch();
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -57,7 +58,7 @@ const SearchResultsComponent = () => {
 
   useEffect(() => {
     router.push(`/search?q=${query}&tab=${activeTab}&page=${activeTabPage}`);
-  }, [activeTabPage, query, activeTab]);
+  }, [activeTabPage, debouncedQuery, activeTab]);
 
   useEffect(() => {
     if (searchParams.get("tab")) {
@@ -71,15 +72,9 @@ const SearchResultsComponent = () => {
     }
   }, [searchParams]);
 
-  useEffect(() => {
-    if (query) {
-      router.push(`/search?q=${query}&tab=${activeTab}&page=${activeTabPage}`);
-    }
-  }, [query]);
-
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="lg:w-[80%] mx-auto text-white">
+    <div className="w-full flex flex-col items-center gap-4">
+      <div className="w-full lg:max-w-[80%] mx-auto text-white">
         {/* search results bar */}
         <div className="w-full flex flex-col lg:flex-row justify-start gap-6">
           {/* Search settings */}
@@ -118,8 +113,9 @@ const SearchResultsComponent = () => {
         {/* Search results */}
         <div className="w-full flex justify-center py-4 lg:py-8">
           {loading ? (
-            <div className="h-48 flex items-center my-auto text-orange-400 text-3xl">
-              Loading...
+            <div className="h-48 flex gap-4 items-center my-auto text-orange-400 text-3xl">
+              <p>Loading</p>
+              <LoadingSpinner />
             </div>
           ) : (
             <TabSelector activeTab={activeTab} results={results} />

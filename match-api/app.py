@@ -129,12 +129,12 @@ def handle_request():
         lyrics_data = index.track_ids_to_data(ranked_lyric_track_ids)
 
         # To see some of the results and that the search is working uncomment this code
-        print("Track data results: ", '\n', track_data)
-        print("Track scores: ", '\n', sorted_track_scores[:10])
-        print("Album data results: ", '\n', album_data)
-        print("Album scores: ", '\n', sorted_album_scores[:10])
-        print("Artist data results: ", '\n', artist_data)
-        print("Artist scores: ", '\n', sorted_artist_scores[:10])
+        # print("Track data results: ", '\n', track_data)
+        # print("Track scores: ", '\n', sorted_track_scores[:10])
+        # print("Album data results: ", '\n', album_data)
+        # print("Album scores: ", '\n', sorted_album_scores[:10])
+        # print("Artist data results: ", '\n', artist_data)
+        # print("Artist scores: ", '\n', sorted_artist_scores[:10])
         # print("Lyrics data results: ", '\n', lyrics_data)
         return {
             'songs': json.loads(track_data), 'albums' : json.loads(album_data), 'artists': json.loads(artist_data),
