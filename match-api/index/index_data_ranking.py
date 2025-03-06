@@ -1,10 +1,10 @@
 import ast
 from index.store_load import load_data
 from index.boolean_search import infix_to_postfix, evaluate_postfix, boolean_tokenize
-import numpy as np
 import json
 import pandas as pd
 from utils.text_processing import process_text
+from utils.lyrics_expansion import expand_query
 from utils import parse_id
 import math
 import itertools
@@ -350,15 +350,18 @@ class Index:
             scores[doc_id] += self.calculate_tfidf(tf, df)
 
 
-    def search_rank_lyrics(self, query:str):
-        query_tokens = process_text(query).split()
+    def search_rank_lyrics(self, query:str, expand:bool):
+        if expand:
+            query_tokens = expand_query(query, self.ft, self.precomputed_similar_words_lyrics, self.lyrics_vectors, self.lyrics_word_map, self.lyrics_5000_stems)
+        else:
+            query_tokens = process_text(query).split()
+        # print("Extended query:", query_tokens)
         self.initialise_lyrics_scores_dict()
         for term in query_tokens:
             if term in self.lyrics_index:
                 self.rank_lyrics(term)
             else:
                 continue
-        
         return self.track_lyrics_scores
 
 
