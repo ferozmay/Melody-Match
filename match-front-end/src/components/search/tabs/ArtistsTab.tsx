@@ -7,7 +7,7 @@ const ArtistsTab = ({ results }: { results: SearchResults }) => {
   return (
     <div className="w-full flex flex-col gap-8">
       <div className="grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
-        {results.artists.map((artist: Artist, idx: number) => (
+        {results.artists?.map((artist: Artist, idx: number) => (
           <ArtistCard key={`artist-${idx}-${artist.id}`} artist={artist} />
         ))}
       </div>

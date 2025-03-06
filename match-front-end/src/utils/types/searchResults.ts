@@ -4,10 +4,10 @@ import { Song } from "./song";
 
 export type SearchResults = {
   songs: Song[];
-  artists: Artist[];
-  albums: Album[];
+  artists?: Artist[];
+  albums?: Album[];
 
   track_pages: number;
-  artist_pages: number;
-  album_pages: number;
+  artist_pages?: number;
+  album_pages?: number;
 };

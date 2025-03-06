@@ -76,7 +76,7 @@ def load_data():
         lyrics_index = pickle.load(g)
     with open("data/stored_data/precomputed_similar_stems_lyrics.pkl", "rb") as g:
         precomputed_similar_lyrics = pickle.load(g)
-    with open("data/stored_data/lyrics_5000_stems.txt", "r") as file:
+    with open("data/stored_data/lyrics_5000_stems.txt", "r", encoding="utf-8") as file:
         lyrics_5000_stems = {stem.strip() for stem in file.readlines()}
 
     # Load the fasttext model

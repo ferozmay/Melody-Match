@@ -47,7 +47,7 @@ next-env.d.ts
 # data
 match-api/data/
 match-api/inverted-index.json
-
+match-api/models/
 # Lyrics query expansion
 !match-api/data/lyrics_similarity_dict.pkl # keep this file
 match-api/models/

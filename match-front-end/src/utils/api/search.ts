@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { SEARCH_URL } from "./const";
+import { LYRICS_SEARCH_URL, SEARCH_URL } from "./const";
 import { SearchResults } from "../types/searchResults";
 import useDebounce from "../hooks/debounce";
 import paginatorStore from "../store/paginator";
@@ -10,13 +10,21 @@ const useApiSearch = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const debouncedQuery = useDebounce(query, 1500);
   const activePage = paginatorStore((state) => state.activePage);
+  const [activeSearchURL, setActiveSearchURL] = useState<string>(SEARCH_URL);
+
+  const toggleSearchURL = (mode: string) => {
+    if (mode === "lyrics") setActiveSearchURL(LYRICS_SEARCH_URL);
+    else setActiveSearchURL(SEARCH_URL);
+  };
 
   useEffect(() => {
     if (debouncedQuery) {
       setLoading(true);
       setResults({} as SearchResults);
       fetch(
-        `${SEARCH_URL}?query=${encodeURIComponent(query)}&page=${activePage}`,
+        `${activeSearchURL}?query=${encodeURIComponent(
+          query
+        )}&page=${activePage}`,
         {
           headers: {
             "Access-Control-Allow-Origin": "*",
@@ -41,12 +49,13 @@ const useApiSearch = () => {
     //   setLoading(false);
     // }, 500);
     // return () => clearTimeout(timer);
-  }, [debouncedQuery, activePage]);
+  }, [debouncedQuery, activePage, activeSearchURL]);
 
   return {
     query,
     debouncedQuery,
     setQuery,
+    toggleSearchURL,
     results,
     loading,
   };

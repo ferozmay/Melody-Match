@@ -34,7 +34,10 @@ def handle_nan(value):
 
 class Index:
     def load_index(self):
-        self.track_data, self.album_data, self.artist_data, self.doclengths_track_data, self.doclengths_album_data, self.doclengths_artist_data, self.index, self.lyrics_index, self.doclengths_lyrics, self.precomputed_similar_words_lyrics, self.lyrics_5000_stems, self.ft, self.lyrics_vectors, self.lyrics_word_map = load_data()
+        self.track_data, self.album_data, self.artist_data, self.doclengths_track_data, \
+            self.doclengths_album_data, self.doclengths_artist_data, self.index, \
+                self.lyrics_index, self.doclengths_lyrics, self.precomputed_similar_words_lyrics, \
+                      self.lyrics_5000_stems, self.ft, self.lyrics_vectors, self.lyrics_word_map = load_data()
     
     def load_parameters(self, hyperparams: dict, ranking_algs: dict):
         self.hyperparams = hyperparams

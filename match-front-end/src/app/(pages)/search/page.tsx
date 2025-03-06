@@ -29,8 +29,10 @@ const TabSelector = ({
       return <ArtistsTab results={results} />;
     case "Albums":
       return <AlbumsTab results={results} />;
+    case "Lyrics":
+      return <SongsTab results={results} />;
     default:
-      return <></>;
+      return <p>Unknown Tab</p>;
   }
 };
 
@@ -49,9 +51,16 @@ const SearchResultsComponent = () => {
     (state: PaginatorStoreProps) => state.setActivePage
   );
 
-  const { query, setQuery, results, loading, debouncedQuery } = useApiSearch();
+  const { query, setQuery, results, loading, debouncedQuery, toggleSearchURL } =
+    useApiSearch();
 
   const handleTabChange = (tab: string) => {
+    if (tab === "Lyrics") {
+      toggleSearchURL("lyrics");
+    } else {
+      toggleSearchURL("search");
+    }
+
     setActiveTab(tab);
     setActiveTabPage(1);
   };

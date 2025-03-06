@@ -8,7 +8,6 @@ import pickle, pandas as pd, time
 import threading
 from utils import parse_id
 from utils.preview.youtube import search_youtube_id
-from utils.ids_to_data import track_ids_to_data, album_ids_to_data, artist_ids_to_data
 
 # init the app
 app = Flask(__name__)
@@ -27,9 +26,13 @@ cors = CORS(
 def load_index():
     global index
     index = Index()
-    
     start_time = time.time()
     index.load_index()
+    hyperparams = {'k':1.5, 'b':0.75, 'alpha':0.4, 'beta':0.4, 'gamma':0}
+    # we give the capability to choose between BM25 and TFIDF for each of the different documents types that can do both: 
+    # names (song names, artist names, album names), genres (song genres, artist genres, album genres), lyrics (song lyrics)
+    ranking_algs = {'names': 'BM25', 'genres': 'BM25', 'lyrics': 'BM25'}
+    index.load_parameters(hyperparams, ranking_algs)
     print("Data loaded successfully! Time taken: ", time.time() - start_time)
 
 index_thread = threading.Thread(target=load_index)
@@ -77,10 +80,11 @@ def search_lyrics():
     if query:
         lyrics_scores = index.search_rank_lyrics(query, expand=True)
         sorted_lyrics_scores = sorted(lyrics_scores.items(), key=lambda item: item[1], reverse=True)
+        track_pages = len(sorted_lyrics_scores) // page_limit + 1 if len(sorted_lyrics_scores) % page_limit != 0 else 0
         ranked_lyric_track_ids = [track_id for track_id, _ in sorted_lyrics_scores][(page-1)*page_limit:(page)*page_limit]
         lyrics_data = index.track_ids_to_data(ranked_lyric_track_ids)
-        return json.loads(lyrics_data)
-    return []
+        return {"songs": json.loads(lyrics_data), "track_pages": track_pages}
+    return {"songs": [], "track_pages": 0}
     
 @app.route("/api/search")
 def handle_request():
@@ -97,15 +101,9 @@ def handle_request():
         # alpha: the artist score affecting the song score
         # beta: the artist score affecting the album score
         # gamma: the album score affecting the song score
-        
-        hyperparams = {'k':1.5, 'b':0.75, 'alpha':0.4, 'beta':0.4, 'gamma':0}
         multipliers = {'names': 1, 'genres': 12, 'tags': 1}
         # mulitpliers for the scores for titles, genres and tags (in that order)
         multipliers = (multipliers['names'], multipliers['genres'], multipliers['tags'])
-        # we give the capability to choose between BM25 and TFIDF for each of the different documents types that can do both: 
-        # names (song names, artist names, album names), genres (song genres, artist genres, album genres), lyrics (song lyrics)
-        ranking_algs = {'names': 'BM25', 'genres': 'BM25', 'lyrics': 'BM25'}
-        index.load_parameters(hyperparams, ranking_algs)
         track_scores, album_scores, artist_scores = index.search_rank(query)
 
         # Define a helper function to sum the values of a tuple 
