@@ -10,8 +10,8 @@ from utils.text_processing import normalize
 import json
 import os
 from tqdm import tqdm
-# import fasttext
-# import fasttext.util
+import fasttext
+import fasttext.util
 import pickle
 
 def read_lyrics(lyrics_train_path, lyrics_test_path):

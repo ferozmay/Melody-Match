@@ -3,7 +3,9 @@ import pandas as pd
 from index.data_preprocessing.data_cleaning import clean_and_make_data
 from index.data_preprocessing.data_processing import process_data
 from index.inverted_index import create_inverted_index
+from utils.lyrics_expansion import get_word_vectors
 import json
+import fasttext
 
 """This module serves two purpouses:
 1. Loads, preprocesses dataframes, builds inverted index. Saves dfs and the inverted index as binary in the data/stored_data folder.
@@ -62,14 +64,31 @@ def load_data():
     doclengths_track_data = pd.read_hdf('data/stored_data/dataframes.h5', key='doclengths_track_data_df')
     doclengths_album_data = pd.read_hdf('data/stored_data/dataframes.h5', key='doclengths_album_data_df')
     doclengths_artist_data = pd.read_hdf('data/stored_data/dataframes.h5', key='doclengths_artist_data_df')
-    
+
     with open("data/stored_data/inverted_index.pkl", "rb") as f:
         inverted_index = pickle.load(f)
-    # lyrics_index = None
-    with open("data/stored_data/lyrics_inverted_word.pkl", "rb") as g:
-        lyrics_index = pickle.load(g)
 
-    return track_data, album_data, artist_data, doclengths_track_data, doclengths_album_data, doclengths_artist_data, inverted_index, lyrics_index
+    # Load lyrics related data
+    # TODO - put into the main dataframe
+    doclengths_lyrics = pd.read_hdf('data/stored_data/lyrics_doc_length.h5', key='lyrics_doc_length')
+
+    with open("data/stored_data/lyrics_inverted_index.pkl", "rb") as g:
+        lyrics_index = pickle.load(g)
+    with open("data/stored_data/precomputed_similar_stems_lyrics.pkl", "rb") as g:
+        precomputed_similar_lyrics = pickle.load(g)
+    with open("data/stored_data/lyrics_5000_stems.txt", "r") as file:
+        lyrics_5000_stems = {stem.strip() for stem in file.readlines()}
+
+    # Load the fasttext model
+    ft = fasttext.load_model('models/cc.en.300.bin')
+
+    # Get the word vectors for the lyrics words
+    lyrics_words = list(precomputed_similar_lyrics.keys())
+    lyrics_vectors = get_word_vectors(lyrics_words, ft)
+    lyrics_word_map = {i: word for i, word in enumerate(lyrics_words)}
+
+    return (track_data, album_data, artist_data, doclengths_track_data, doclengths_album_data, doclengths_artist_data, inverted_index, 
+            lyrics_index, doclengths_lyrics, precomputed_similar_lyrics, lyrics_5000_stems, ft, lyrics_vectors, lyrics_word_map)
 
 
 if __name__ == "__main__":
