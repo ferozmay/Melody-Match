@@ -53,21 +53,16 @@ match-api/__pycache__/
 node_modules/
 
 # Similarity data
-similarity_research/data/FMA
-similarity_research/data/MSD
-similarity_research/data/temp
-similarity_research/models/FMA_similarity_dict.json
-similarity_research/models/
+notebooks_similarity/data/FMA
+notebooks_similarity/data/MSD
+notebooks_similarity/data/temp
+notebooks_similarity/models/FMA_similarity_dict.json
+notebooks_similarity/models/
 *.mp3
-
-# Lyrics query expansion
-lyrics_research/cc.en.300.bin
-lyrics_research/data
 
 # Lyrics query expansion
 !match-api/data/lyrics_similarity_dict.pkl # keep this file
 match-api/models/
-lyrics_research/data
 
 # virtual environments
 venv/

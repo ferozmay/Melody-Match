@@ -86,6 +86,7 @@ def load_data():
     lyrics_words = list(precomputed_similar_lyrics.keys())
     lyrics_vectors = get_word_vectors(lyrics_words, ft)
     lyrics_word_map = {i: word for i, word in enumerate(lyrics_words)}
+    # ft = lyrics_vectors = lyrics_word_map = None
 
     return (track_data, album_data, artist_data, doclengths_track_data, doclengths_album_data, doclengths_artist_data, inverted_index, 
             lyrics_index, doclengths_lyrics, precomputed_similar_lyrics, lyrics_5000_stems, ft, lyrics_vectors, lyrics_word_map)

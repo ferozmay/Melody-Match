@@ -58,7 +58,7 @@ def fasttext_exact_nn(word, lyrics_vectors, lyrics_word_map, ft, k, threshold):
 
     # Get top-k similar words
     top_indices = np.argsort(similarities)[::-1][:k]  # Sort descending, take top-k
-    similar_words = {lyrics_word_map[i] for i in top_indices if similarities[i] > threshold}
+    similar_words = [lyrics_word_map[i] for i in top_indices if similarities[i] > threshold]
 
     return similar_words
 

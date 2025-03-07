@@ -80,7 +80,7 @@ def handle_request():
 
     if query:
 
-          # total number of tracks
+        # total number of tracks
         # the hyperparamters k,b are reported to be sensible for BM25 algorithm, but we can evaluate different settings for our use case 
         # we can also evaluate the effect of the hyperparameters alpha, beta, gamma which are used for instances where an artists songs should show in the songs section
         # alpha: the artist score affecting the song score
@@ -138,7 +138,10 @@ def handle_request():
         # print("Album scores: ", '\n', sorted_album_scores[:10])
         # print("Artist data results: ", '\n', artist_data)
         # print("Artist scores: ", '\n', sorted_artist_scores[:10])
-        print("Lyrics data results: ", '\n', lyrics_data)
+        print(f"query|{query}")
+        for i, d in enumerate(json.loads(lyrics_data)):
+            print(f'Song{i}|'+d['id']+'|'+d['title']+'|'+d['artist']+'|'+d['album'])
+        # print("Lyrics data results: ", '\n', lyrics_data)
 
         return {
             'songs': json.loads(track_data), 'albums' : json.loads(album_data), 'artists': json.loads(artist_data),
