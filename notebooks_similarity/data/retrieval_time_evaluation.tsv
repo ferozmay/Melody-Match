@@ -1,16 +1,25 @@
-query   main_time   lyrics_time 
-recall  2.05    1.85
-layout  1.88    2.16
-tools   2.10    1.70
-people, polynucleotide, give  2.05  2.58
-don, time, politics 2.57    1.78
-ethical, time, helpful  2.66    1.55
-day, dose, work, booth, bit 2.21    1.81
-builts, good, today, make, makara   2.18    
-genossen, life, executed, ensconced, remove 1.71
-regular, home, people, sitehttp, wak, scope, post   2.12    0.93
-experience, judgments, superpositions, opion, diffuser, rely, people    1.8 2.13 
-years, spongey, moves, time, people, editorial, part    2.76    3.75
-videos, hunger, unexpected, day, invaluable, love, put, marvel, influenced  3.42    2.36
-romanticize, 1960s, path, people, play, part, home, geoexchange, open   
-acrosome, strategic, depraved, huge, maintain, song, back, formulation, free    
+main_time    lyrics_time    num_words    query   
+2.05    1.85    1    recall
+1.88    2.16    1    layout
+2.10    1.70    1    tools
+2.05    2.58    3    people, polynucleotide, give
+2.57    1.78    3    don, time, politics
+2.66    1.55    3    ethical, time, helpful  
+2.21    1.81    5    day, dose, work, booth, bit 
+2.18    3.88    5    builts, good, today, make, makara     
+2.56    1.83    5    crazy, confident, time, portable, work  
+3.02    3.80    10    free, creating, good, unreported, people, hydor, clove, back, time, 1p
+3.08    6.15    10    antibody, sweets, iframe, time, making, make, prs, bands, feel, makes
+2.11    3.13    10    put, loser, ordinary, officiates, win, make, forecasts, actuator, bag, kiln
+2.51    5.32    15    oil, projects, current, time, people, grab, area, hair, reconnoitered, information, nice, stressing, day, public, world
+2.08    2.30    15    photgraphy, hissed, objective, debriefed, parallax, don, bicalutamide, basic, hypothesize, subspecialists, team, people, day, added, changeup
+2.70    2.78    15    tapa, time, student, health, great, make, site, onwhat, read, host, disciplinary, start, curious2, ще, place
+lyrics_evaluation
+1.85    1    kitty
+2.05    3    kitty, kitty, kitty
+2.03    5    kitty, kitty, kitty, kitty, kitty
+2.13    7    kitty, kitty, kitty, kitty, kitty, kitty, kitty
+2.20    9    kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty
+2.30    11    kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty
+2.30    13    kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty
+2.40    15    kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty, kitty
